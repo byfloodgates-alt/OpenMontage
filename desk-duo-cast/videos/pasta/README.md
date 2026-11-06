@@ -2,7 +2,7 @@
 
 The guy asks Claude (the robot) how to make pasta. Claude gives real steps and roasts him at every one.
 
-- `voice/script.json`: the dialogue (who, mood, text). `voice/out/` holds the voiced lines, the lip-sync timeline and the caption timings.
+- `voice/script.json`: the dialogue (who, mood, text). Rendering the script creates `voice/out/`, with the voiced lines, the lip-sync timeline and the caption timings. It is not committed.
 - `index.html`: the 3D scene, step cards, captions and end card, all driven by `window.frame(i)`.
 - `words.py`: caption phrases from Whisper word timings. `mix.py`: dialogue, mandolin bed (dips under speech) and UI sounds.
 - `render.mjs`: `still 1.2,10.6` for test frames, or `video` for all frames.
