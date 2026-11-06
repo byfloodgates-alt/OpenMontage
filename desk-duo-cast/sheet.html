@@ -1,0 +1,136 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Desk Duo Cast</title>
+<style>html,body{margin:0;background:#2a1a12}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { createHost, createBot, addWarmLights } from './characters.js';
+
+const q = new URLSearchParams(location.search);
+const mode = q.get('mode') || 'turnaround';
+const W = +(q.get('w') || 1920), H = +(q.get('h') || 1080);
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+function stage(bg = 0xd9a77a) {
+  const s = new THREE.Scene(); s.background = new THREE.Color(bg);
+  addWarmLights(THREE, s);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x8a5a3a, roughness: 0.9 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; s.add(floor);
+  return s;
+}
+const cam = (fov, pos, look) => { const c = new THREE.PerspectiveCamera(fov, 1, 0.05, 50); c.position.set(...pos); c.lookAt(...look); return c; };
+function shot(scene, camera, x, y, w, h) {
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setViewport(x, H - y - h, w, h); renderer.setScissor(x, H - y - h, w, h); renderer.setScissorTest(true);
+  renderer.render(scene, camera);
+}
+
+if (mode === 'turnaround') {
+  // top row: host front, 3/4, side, back-3/4; bottom row: bot front, 3/4, side, + both together
+  const views = [0, Math.PI / 4, Math.PI / 2, Math.PI * 0.8];
+  const cw = W / 4, ch = H / 2;
+  views.forEach((a, i) => {
+    const s = stage(); const h = createHost(THREE); h.root.rotation.y = a; s.add(h.root);
+    h.update({ smile: 0.2, armR: { raise: 0.55, bend: 0.9 }, armL: { raise: 0.55, bend: 0.9 } });
+    shot(s, cam(30, [0, 1.05, 3.6], [0, 0.85, 0]), i * cw, 0, cw, ch);
+  });
+  views.slice(0, 3).forEach((a, i) => {
+    const s = stage(); const b = createBot(THREE); b.root.rotation.y = a; s.add(b.root);
+    b.update({ t: 1.3 });
+    shot(s, cam(30, [0, 1.1, 3.0], [0, 0.85, 0]), i * cw, ch, cw, ch);
+  });
+  const s = stage(); const h = createHost(THREE), b = createBot(THREE);
+  h.root.position.set(-0.55, 0, 0); h.root.rotation.y = 0.45; b.root.position.set(0.75, 0, -0.3); b.root.rotation.y = -0.5;
+  h.update({ talk: 0.4, brows: 0.3, look: [0.8, 0.2], headTurn: 0.35 });
+  b.update({ t: 2.1, talk: 0.8, mood: 'happy', look: [-0.6, 0], headTurn: -0.15 });
+  s.add(h.root, b.root);
+  shot(s, cam(32, [0, 1.15, 4.2], [0.1, 0.95, 0]), 3 * cw, ch, cw, ch);
+}
+
+if (mode === 'expressions') {
+  const hostE = [
+    ['neutral', {}], ['talk', { talk: 0.8 }], ['smile', { smile: 0.9, brows: 0.3 }], ['surprised', { talk: 1, brows: 1, look: [0, 0.3] }],
+    ['sceptical', { brows: -0.3, browTilt: 1, look: [0.8, 0], headTilt: 0.08 }], ['frown', { brows: -1, smile: -0.3 }], ['blink', { blink: 1 }],
+  ];
+  const botE = [
+    ['neutral', {}], ['talk', { talk: 0.9 }], ['happy', { mood: 'happy', talk: 0.5 }], ['wide', { mood: 'wide' }],
+    ['squint', { mood: 'squint' }], ['sad', { mood: 'sad' }], ['blink', { blink: 1 }],
+  ];
+  const cw = W / 7, ch = H / 2;
+  hostE.forEach(([, st], i) => {
+    const s = stage(0xe2b48a); const h = createHost(THREE); s.add(h.root); h.update(st);
+    shot(s, cam(18, [0, 1.48, 1.6], [0, 1.47, 0]), i * cw, 0, cw, ch);
+  });
+  botE.forEach(([, st], i) => {
+    const s = stage(0xe2b48a); const b = createBot(THREE); s.add(b.root); b.update({ t: 1.7 + i, ...st });
+    shot(s, cam(24, [0, 1.07, 2.0], [0, 1.05, 0]), i * cw, ch, cw, ch);
+  });
+}
+
+if (mode === 'scene' || mode === 'anim') {
+  const s = new THREE.Scene(); s.background = new THREE.Color(0x3a2418);
+  addWarmLights(THREE, s);
+  const M = (c, o) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, flatShading: true, ...o });
+  const add = (g, m, x, y, z) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; s.add(o); return o; };
+  add(new THREE.PlaneGeometry(12, 6), M(0xc9976c), 0, 3, -1.6);                       // back wall
+  add(new THREE.PlaneGeometry(12, 12), M(0x6a3e26), 0, 0, 0).rotation.x = -Math.PI / 2; // floor
+  add(new THREE.BoxGeometry(3.4, 0.06, 0.95), M(0xc07a42), 1.3, 0.95, -0.95);          // desk top
+  for (let i = 0; i < 12; i++) add(new THREE.BoxGeometry(0.24, 0.9, 0.04), M(i % 2 ? 0xc98a52 : 0xb87440), -0.2 + i * 0.27, 0.47, -0.5);
+  add(new THREE.BoxGeometry(0.75, 0.9, 0.7), M(0xe6ddd0), 2.25, 0.45, 0.05);           // white drawers
+  // monitor with coloured timeline bars
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 300; const c2 = cv.getContext('2d');
+  c2.fillStyle = '#121418'; c2.fillRect(0, 0, 512, 300);
+  ['#e46f5a', '#e6b04c', '#5db7a8', '#6d8fe0'].forEach((col, r) => { for (let k = 0; k < 6; k++) { c2.fillStyle = col; c2.fillRect(40 + k * 72 + (r % 2) * 20, 150 + r * 26, 60, 16); } });
+  ['#ff5f57', '#febc2e', '#28c840'].forEach((col, k) => { c2.fillStyle = col; c2.beginPath(); c2.arc(30 + k * 22, 26, 7, 0, 7); c2.fill(); });
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  add(new THREE.BoxGeometry(1.1, 0.68, 0.05), M(0x15161a), 0.75, 1.42, -1.25);
+  add(new THREE.PlaneGeometry(1.04, 0.62), new THREE.MeshBasicMaterial({ map: tex }), 0.75, 1.42, -1.222);
+  add(new THREE.BoxGeometry(0.06, 0.3, 0.06), M(0x15161a), 0.75, 1.1, -1.25);
+  // posters on the wall
+  add(new THREE.PlaneGeometry(0.75, 0.95), M(0xf1e6d6), 0.35, 2.35, -1.58);
+  add(new THREE.PlaneGeometry(0.8, 0.55), M(0x2b2019), 2.0, 2.1, -1.58);
+  const h = createHost(THREE), b = createBot(THREE, { stand: 0.25 });
+  h.root.position.set(0, 0, 0.6); h.root.rotation.y = 0.8;
+  h.update({ talk: 0.35, brows: 0.1, look: [0.4, 0.2], headTurn: 0.15, armL: { raise: 0.2, bend: 1.25 }, armR: { raise: 0.2, bend: 1.25 } });
+  b.root.position.set(1.5, 0.98, -0.7); b.root.rotation.y = -0.55; b.root.scale.setScalar(1.3);
+  b.update({ t: 3.3, talk: 0.75, look: [-0.5, -0.1] });
+  s.add(h.root, b.root);
+  const c = cam(52, [0.6, 1.5, 4.4], [0.65, 2.05, 0]);
+  if (mode === 'scene') shot(s, c, 0, 0, W, H);
+  else {
+    // timeline.json: { fps, frames: [{ host: talk0..1, bot: talk0..1, speaker, hostMood, botMood }] }
+    const tl = await (await fetch(q.get('tl') || 'voice/preview/timeline.json')).json();
+    const ease = (a, b, k) => a + (b - a) * k;
+    let hTurn = 0.15, bTurn = 0;
+    window.frameCount = tl.frames.length;
+    window.frame = (i) => {
+      const f = tl.frames[i], t = i / tl.fps;
+      const blinkH = (t % 3.7) < 0.12 ? 1 : 0, blinkB = ((t + 1.3) % 4.3) < 0.1 ? 1 : 0;
+      const hostSpeaks = f.speaker === 'host', botSpeaks = f.speaker === 'bot';
+      hTurn = ease(hTurn, hostSpeaks ? 0.05 : 0.2, 0.15);       // turns toward the bot when listening
+      bTurn = ease(bTurn, botSpeaks ? -0.05 : 0.08, 0.15);
+      const ex = f.hostMood === 'excited';
+      h.update({
+        talk: f.host, breathe: t / 4, blink: blinkH, headTurn: hTurn,
+        headNod: hostSpeaks ? Math.sin(t * 7) * 0.03 * f.host : 0, headTilt: f.hostMood === 'flat' ? 0.06 : 0,
+        brows: ex ? 0.9 : f.hostMood === 'flat' ? -0.2 : 0.1, smile: ex ? 0.5 : 0, look: [0.5, 0.2],
+        lean: ex ? 0.08 : 0,
+        armL: { raise: 0.2, bend: 1.25 },
+        armR: ex && hostSpeaks ? { raise: 0.9 + Math.sin(t * 6) * 0.15, bend: 1.7, out: 0.25 } : { raise: 0.2, bend: 1.25 },
+      });
+      b.update({ t, talk: f.bot, blink: blinkB, headTurn: bTurn, look: [-0.5, -0.1],
+        mood: { dry: 'squint', pleased: 'happy', calm: 'neutral' }[f.botMood] || 'neutral',
+        headTilt: botSpeaks ? Math.sin(t * 3) * 0.03 : 0 });
+      shot(s, c, 0, 0, W, H);
+    };
+  }
+}
+
+window.__done = true;
+</script></body></html>

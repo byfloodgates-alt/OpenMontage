@@ -1,0 +1,10 @@
+[
+ {"id":"01","who":"host","mood":"excited","text":"Wait. This channel got half a million views. And nobody's on camera!"},
+ {"id":"02","who":"bot","mood":"dry","text":"And you've been planning yours since last spring."},
+ {"id":"03","who":"host","mood":"calm","text":"I have a banner."},
+ {"id":"04","who":"bot","mood":"calm","text":"Then let's make the part that goes under the banner. Watch."},
+ {"id":"05","who":"host","mood":"flat","text":"So I just type one sentence?"},
+ {"id":"06","who":"bot","mood":"pleased","text":"One sentence. I'll handle the other nine hundred."},
+ {"id":"02b","who":"bot","mood":"dry","voice":"bm_lewis","text":"And you've been planning yours since last spring."},
+ {"id":"04b","who":"bot","mood":"calm","voice":"bm_lewis","text":"Then let's make the part that goes under the banner. Watch."}
+]

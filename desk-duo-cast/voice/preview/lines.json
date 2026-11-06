@@ -1,0 +1,50 @@
+[
+ {
+  "id": "01",
+  "who": "host",
+  "mood": "excited",
+  "text": "Wait. This channel got half a million views. And nobody's on camera!",
+  "file": "01.wav",
+  "dur": 3.459
+ },
+ {
+  "id": "02",
+  "who": "bot",
+  "mood": "dry",
+  "text": "And you've been planning yours since last spring.",
+  "file": "02.wav",
+  "dur": 2.224
+ },
+ {
+  "id": "03",
+  "who": "host",
+  "mood": "calm",
+  "text": "I have a banner.",
+  "file": "03.wav",
+  "dur": 1.062
+ },
+ {
+  "id": "04",
+  "who": "bot",
+  "mood": "calm",
+  "text": "Then let's make the part that goes under the banner. Watch.",
+  "file": "04.wav",
+  "dur": 3.089
+ },
+ {
+  "id": "05",
+  "who": "host",
+  "mood": "flat",
+  "text": "So I just type one sentence?",
+  "file": "05.wav",
+  "dur": 1.914
+ },
+ {
+  "id": "06",
+  "who": "bot",
+  "mood": "pleased",
+  "text": "One sentence. I'll handle the other nine hundred.",
+  "file": "06.wav",
+  "dur": 2.702
+ }
+]
