@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Pasta Quest</title>
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Lilita One"; src: url("assets/fonts/LilitaOne.ttf") format("truetype"); }
+      @font-face { font-family: "Fredoka"; font-weight: 700; src: url("assets/fonts/Fredoka-700.ttf") format("truetype"); }
+      body { margin: 0; background: #5fc4ff; font-family: "Fredoka", sans-serif; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+      .bg { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+      .sky { position: absolute; left: 0; top: 0; width: 1080px; height: 1150px; background: linear-gradient(#3fb0ff, #9fdcff 70%, #c9ecff); }
+      .ground { position: absolute; left: 0; top: 1150px; width: 1080px; height: 770px;
+        background-color: #4cb848;
+        background-image: radial-gradient(circle at 50% 45%, #6fd16a 0 13px, #3c9a39 14px 17px, transparent 18px);
+        background-size: 54px 54px; border-top: 10px solid #2f7d2c; box-sizing: border-box; }
+      .cloud { position: absolute; display: block; }
+      .cloud i { position: absolute; display: block; background: #ffffff; border: 6px solid #1d1d1d; box-sizing: border-box; }
+      .hud { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+      .quest { position: absolute; left: 50px; right: 50px; top: 60px; height: 170px; box-sizing: border-box;
+        background: rgba(20, 20, 35, 0.78); border: 6px solid #1d1d1d; border-radius: 26px; padding: 22px 32px; }
+      .qtitle { display: block; font-family: "Lilita One"; font-size: 52px; color: #ffd23f; letter-spacing: 1px; }
+      .qbar { position: absolute; left: 32px; right: 170px; bottom: 26px; height: 40px; background: #3a3a55; border: 5px solid #1d1d1d; border-radius: 12px; overflow: hidden; }
+      .qfill { position: absolute; left: 0; top: 0; display: block; width: 100%; height: 100%; background: linear-gradient(#8dff7a, #3fcf3a); }
+      .qn { position: absolute; right: 32px; bottom: 18px; display: block; width: 120px; text-align: right; font-family: "Lilita One"; font-size: 54px; color: #ffffff; }
+      .lvl { position: absolute; right: 32px; top: 22px; display: block; font-family: "Lilita One"; font-size: 40px; color: #1d1d1d; background: #7dff6a; border: 5px solid #1d1d1d; border-radius: 14px; padding: 2px 16px; }
+      .avwrap { position: absolute; left: 0; top: 260px; width: 1080px; height: 990px; }
+      .world { position: absolute; left: 0; top: 260px; display: block; width: 1080px; height: 990px; }
+      .avwrap svg { display: block; width: 1080px; height: 990px; }
+      .scene, .wrap { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+      .copy { position: absolute; left: 40px; right: 40px; top: 1290px; height: 260px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .step { display: block; font-family: "Lilita One"; font-size: 40px; color: #1d1d1d; background: #ffffff; border: 5px solid #1d1d1d; border-radius: 14px; padding: 4px 22px; }
+      .step.gold { background: #ffd23f; }
+      .title { display: block; margin-top: 18px; font-family: "Lilita One"; font-size: 118px; line-height: 0.95; color: #ffffff;
+        text-shadow: 6px 0 0 #1d1d1d, -6px 0 0 #1d1d1d, 0 6px 0 #1d1d1d, 0 -6px 0 #1d1d1d, 5px 5px 0 #1d1d1d, -5px 5px 0 #1d1d1d, 5px -5px 0 #1d1d1d, -5px -5px 0 #1d1d1d, 0 14px 0 #1d1d1d; }
+      #s0 .title { color: #ffd23f; font-size: 104px; }
+      .chat { position: absolute; left: 60px; right: 60px; top: 1600px; box-sizing: border-box; padding: 26px 34px;
+        background: rgba(15, 15, 28, 0.8); border: 6px solid #1d1d1d; border-radius: 24px; font-size: 46px; line-height: 1.25; color: #ffffff; }
+      .who { color: #6fd3ff; }
+      .xp { position: absolute; left: 0; right: 0; top: 700px; display: block; text-align: center; font-family: "Lilita One"; font-size: 96px; color: #7dff6a;
+        text-shadow: 6px 0 0 #1d1d1d, -6px 0 0 #1d1d1d, 0 6px 0 #1d1d1d, 0 -6px 0 #1d1d1d, 0 12px 0 #1d1d1d; }
+      #s0-xp { display: none; }
+      .done { position: absolute; left: 0; right: 0; top: 330px; display: flex; flex-direction: column; align-items: center; }
+      .done-big { display: block; font-family: "Lilita One"; font-size: 150px; line-height: 0.92; color: #ffd23f; text-align: center;
+        text-shadow: 8px 0 0 #1d1d1d, -8px 0 0 #1d1d1d, 0 8px 0 #1d1d1d, 0 -8px 0 #1d1d1d, 6px 6px 0 #1d1d1d, -6px 6px 0 #1d1d1d, 6px -6px 0 #1d1d1d, -6px -6px 0 #1d1d1d, 0 18px 0 #1d1d1d; }
+      .lvlup { display: block; margin-top: 36px; font-family: "Lilita One"; font-size: 64px; color: #1d1d1d; background: #7dff6a; border: 6px solid #1d1d1d; border-radius: 18px; padding: 6px 30px; }
+      .toast { position: absolute; left: 90px; right: 90px; top: 1290px; height: 250px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        background: #2a1f4a; border: 8px solid #ffd23f; border-radius: 26px; }
+      .toast b { display: block; font-family: "Lilita One"; font-weight: 400; font-size: 46px; color: #ffd23f; }
+      .toast span { display: block; margin-top: 8px; font-family: "Lilita One"; font-size: 84px; color: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="30">
+      <div id="bg" class="clip bg" data-start="0" data-duration="30" data-track-index="0">
+        <div class="sky"></div><div class="cloud" id="cl0" style="left:80px;top:330px;width:260px;height:110px">
+      <i style="left:0;top:40px;width:260px;height:70px"></i>
+      <i style="left:50px;top:0;width:110px;height:80px"></i>
+      <i style="left:140px;top:15px;width:80px;height:70px"></i></div><div class="cloud" id="cl1" style="left:640px;top:240px;width:338px;height:143px">
+      <i style="left:0;top:52px;width:338px;height:91px"></i>
+      <i style="left:65px;top:0;width:143px;height:104px"></i>
+      <i style="left:182px;top:19px;width:104px;height:91px"></i></div><div class="cloud" id="cl2" style="left:380px;top:520px;width:208px;height:88px">
+      <i style="left:0;top:32px;width:208px;height:56px"></i>
+      <i style="left:40px;top:0;width:88px;height:64px"></i>
+      <i style="left:112px;top:12px;width:64px;height:56px"></i></div>
+        <div class="ground"></div>
+      </div>
+
+
+      
+      <section id="s0" class="clip scene" data-start="0" data-duration="3.0" data-track-index="1">
+        <div class="wrap" id="s0-wrap">
+          <svg class="world" id="s0-art" viewBox="0 0 1080 990">
+<g id="s0-rays"><polygon points="700,560 1300.0,560.0 1288.039946704745,679.2015984770367" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 1219.6148749497634,860.0006362175617 1149.6562466519838,957.2521363653698" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 999.9987275635274,1079.615976910126 890.7869678767566,1128.8587987263566" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 699.9977960769381,1159.9999999959523 580.7962415324344,1148.039508848858" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 399.9974551324518,1079.61377298239 302.74621195769015,1009.6547874603756" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 180.38292113652244,859.9968189054455 131.140500477817,750.7848783404269" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 100.00000001619094,559.9955921538763 111.96092901496286,440.7940815435137" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 180.3873289919942,259.99554648651315 250.34667173729935,162.7445602861102" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 400.00508975668424,40.381819190181886 509.2172111984769,-8.860200310334108" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 700.0066117691857,-39.99999996357042 819.2080784437987,-28.038633113282003" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 1000.0063621553779,40.388430973389404 1097.25709138011,110.34813094104135" fill="#fff6b0" opacity="0.55"/><polygon points="700,560 1219.6192827491482,260.00699842286167 1268.8609010908099,369.21930073995486" fill="#fff6b0" opacity="0.55"/></g>
+<g id="s0-item">
+  <g >
+  <polygon points="840,560 880,520 880,670 840,710" fill="#cfcfcf" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="540,560 580,520 880,520 840,560" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="540" y="560" width="300" height="150" fill="#f2f2f2" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <rect x="560" y="500" width="22" height="80" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="600" y="480" width="22" height="100" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="640" y="495" width="22" height="85" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="740" y="490" width="22" height="90" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="780" y="505" width="22" height="75" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="740,470 764,446 764,526 740,550" fill="#b8301c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="660,470 684,446 764,446 740,470" fill="#ff6a52" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="660" y="470" width="80" height="80" fill="#e2452c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <rect x="690" y="430" width="30" height="40" fill="#3f9d3a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+<rect x="560" y="620" width="260" height="22" fill="#4aa8e8" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</svg>
+          <div class="copy" id="s0-copy">
+            <span class="step gold">NEW QUEST</span>
+            <span class="title" id="s0-title">COOK THE<br>PERFECT PASTA</span>
+          </div>
+          <div class="chat" id="s0-chat"><span class="who">ChefBlox:</span> Yo! New quest unlocked. Cook the perfect pasta!</div>
+          <div class="xp" id="s0-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s1" class="clip scene" data-start="3.0" data-duration="4.0" data-track-index="1">
+        <div class="wrap" id="s1-wrap">
+          <svg class="world" id="s1-art" viewBox="0 0 1080 990"><g >
+  <polygon points="940,850 970,820 970,860 940,890" fill="#2f2f2f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="440,850 470,820 970,820 940,850" fill="#6a6a6a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="440" y="850" width="500" height="40" fill="#4a4a4a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g><rect id="s1-f0" x="520" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-f1" x="600" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-f2" x="680" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-f3" x="760" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-f4" x="840" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><g id="s1-pot">
+  <rect x="425" y="640" width="45" height="34" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="870,600 910,560 910,760 870,800" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="470,600 510,560 910,560 870,600" fill="#cfdbe5" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="470" y="600" width="400" height="200" fill="#a9bccb" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <polygon points="492,596 538,570 906,570 860,596" fill="#45b4f0" stroke="#1d1d1d" stroke-width="4"/>
+  <rect x="495" y="625" width="26" height="150" fill="#e6eef4" opacity="0.7"/>
+</g><rect id="s1-b0" x="560" y="575" width="22" height="22" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s1-b1" x="640" y="580" width="22" height="22" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s1-b2" x="720" y="574" width="22" height="22" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s1-b3" x="800" y="580" width="22" height="22" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s1-b4" x="680" y="584" width="22" height="22" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s1-st0" x="560" y="470" width="34" height="34" fill="#ffffff" opacity="0.85" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-st1" x="680" y="470" width="34" height="34" fill="#ffffff" opacity="0.85" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s1-st2" x="800" y="470" width="34" height="34" fill="#ffffff" opacity="0.85" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/></svg>
+          <div class="copy" id="s1-copy">
+            <span class="step">STEP 1/6</span>
+            <span class="title" id="s1-title">BOIL THE WATER</span>
+          </div>
+          <div class="chat" id="s1-chat"><span class="who">ChefBlox:</span> Fill a big pot and bring it to a rolling boil.</div>
+          <div class="xp" id="s1-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s2" class="clip scene" data-start="7.0" data-duration="4.2" data-track-index="1">
+        <div class="wrap" id="s2-wrap">
+          <svg class="world" id="s2-art" viewBox="0 0 1080 990"><g >
+  <polygon points="940,850 970,820 970,860 940,890" fill="#2f2f2f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="440,850 470,820 970,820 940,850" fill="#6a6a6a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="440" y="850" width="500" height="40" fill="#4a4a4a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g><rect id="s2-f0" x="520" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s2-f1" x="600" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s2-f2" x="680" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s2-f3" x="760" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s2-f4" x="840" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><g id="s2-pot">
+  <rect x="425" y="640" width="45" height="34" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="870,600 910,560 910,760 870,800" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="470,600 510,560 910,560 870,600" fill="#cfdbe5" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="470" y="600" width="400" height="200" fill="#a9bccb" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <polygon points="492,596 538,570 906,570 860,596" fill="#45b4f0" stroke="#1d1d1d" stroke-width="4"/>
+  <rect x="495" y="625" width="26" height="150" fill="#e6eef4" opacity="0.7"/>
+</g><rect id="s2-g0" x="650" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s2-g1" x="680" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s2-g2" x="705" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s2-g3" x="665" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s2-g4" x="695" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s2-g5" x="720" y="300" width="18" height="18" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/>
+<g id="s2-shaker">
+  <g >
+  <polygon points="730,150 756,124 756,284 730,310" fill="#d0d0d0" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="620,150 646,124 756,124 730,150" fill="#f4f4f4" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="620" y="150" width="110" height="160" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <g >
+  <polygon points="730,110 756,84 756,124 730,150" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="620,110 646,84 756,84 730,110" fill="#cfdbe5" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="620" y="110" width="110" height="40" fill="#a9bccb" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <rect x="648" y="190" width="54" height="80" fill="#e8e8e8" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <text x="675" y="252" text-anchor="middle" font-family="Lilita One" font-size="64" fill="#e2452c">S</text>
+</g>
+<text id="s2-flavor" x="330" y="250" text-anchor="middle" font-family="Lilita One" font-size="70" fill="#7dff6a" stroke="#1d1d1d" stroke-width="10" paint-order="stroke">+10 FLAVOR</text>
+</svg>
+          <div class="copy" id="s2-copy">
+            <span class="step">STEP 2/6</span>
+            <span class="title" id="s2-title">SALT IT!</span>
+          </div>
+          <div class="chat" id="s2-chat"><span class="who">ChefBlox:</span> Salt the water. Generously! +10 flavor.</div>
+          <div class="xp" id="s2-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s3" class="clip scene" data-start="11.2" data-duration="4.2" data-track-index="1">
+        <div class="wrap" id="s3-wrap">
+          <svg class="world" id="s3-art" viewBox="0 0 1080 990"><g >
+  <polygon points="940,850 970,820 970,860 940,890" fill="#2f2f2f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="440,850 470,820 970,820 940,850" fill="#6a6a6a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="440" y="850" width="500" height="40" fill="#4a4a4a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g><rect id="s3-f0" x="520" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s3-f1" x="600" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s3-f2" x="680" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s3-f3" x="760" y="806" width="40" height="44" fill="#ffc400" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect id="s3-f4" x="840" y="806" width="40" height="44" fill="#ff6a00" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><g id="s3-sticks"><rect x="600" y="250" width="20" height="330" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(-12 610 415)"/><rect x="640" y="250" width="20" height="330" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(-6 650 415)"/><rect x="680" y="250" width="20" height="330" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(0 690 415)"/><rect x="720" y="250" width="20" height="330" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(5 730 415)"/><rect x="760" y="250" width="20" height="330" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(11 770 415)"/></g><g id="s3-pot">
+  <rect x="425" y="640" width="45" height="34" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="870,600 910,560 910,760 870,800" fill="#7d93a6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="470,600 510,560 910,560 870,600" fill="#cfdbe5" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="470" y="600" width="400" height="200" fill="#a9bccb" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  
+  <rect x="495" y="625" width="26" height="150" fill="#e6eef4" opacity="0.7"/>
+</g>
+<g id="s3-spoon">
+  <rect x="850" y="330" width="30" height="300" fill="#b9773e" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="900,300 918,282 918,342 900,360" fill="#8f5a2c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="830,300 848,282 918,282 900,300" fill="#d08b4f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="830" y="300" width="70" height="60" fill="#b9773e" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>
+          <div class="copy" id="s3-copy">
+            <span class="step">STEP 3/6</span>
+            <span class="title" id="s3-title">ADD + STIR</span>
+          </div>
+          <div class="chat" id="s3-chat"><span class="who">ChefBlox:</span> Drop in the pasta and stir so it doesn't stick.</div>
+          <div class="xp" id="s3-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s4" class="clip scene" data-start="15.4" data-duration="4.6" data-track-index="1">
+        <div class="wrap" id="s4-wrap">
+          <svg class="world" id="s4-art" viewBox="0 0 1080 990">
+<g id="s4-box">
+  <g >
+  <polygon points="780,300 830,250 830,770 780,820" fill="#b8301c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="480,300 530,250 830,250 780,300" fill="#ff6a52" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="480" y="300" width="300" height="520" fill="#e2452c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <rect x="505" y="330" width="250" height="90" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <text x="630" y="392" text-anchor="middle" font-family="Lilita One" font-size="52" fill="#1d1d1d">SPAGHETTI</text>
+  <g fill="#f5c24c" stroke="#1d1d1d" stroke-width="4">
+    <rect x="525" y="450" width="16" height="140"/><rect x="560" y="450" width="16" height="140"/><rect x="595" y="450" width="16" height="140"/>
+    <rect x="630" y="450" width="16" height="140"/><rect x="665" y="450" width="16" height="140"/><rect x="700" y="450" width="16" height="140"/>
+  </g>
+  <rect x="505" y="630" width="250" height="160" fill="#1d1d1d" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <text id="s4-t10" x="630" y="740" text-anchor="middle" font-family="Lilita One" font-size="92" fill="#ff5b5b">10:00</text>
+  <text id="s4-t9" x="630" y="740" text-anchor="middle" font-family="Lilita One" font-size="92" fill="#7dff6a">9:00</text>
+</g>
+<g id="s4-badge">
+  <rect x="390" y="150" width="480" height="100" rx="18" fill="#ffd23f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <text x="630" y="218" text-anchor="middle" font-family="Lilita One" font-size="54" fill="#1d1d1d">AL DENTE UNLOCKED</text>
+</g>
+</svg>
+          <div class="copy" id="s4-copy">
+            <span class="step">STEP 4/6</span>
+            <span class="title" id="s4-title">1 MIN LESS</span>
+          </div>
+          <div class="chat" id="s4-chat"><span class="who">ChefBlox:</span> Cook 1 minute less than the box says.</div>
+          <div class="xp" id="s4-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s5" class="clip scene" data-start="20.0" data-duration="4.2" data-track-index="1">
+        <div class="wrap" id="s5-wrap">
+          <svg class="world" id="s5-art" viewBox="0 0 1080 990">
+<g id="s5-mug">
+  <rect x="800" y="600" width="70" height="40" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="840" y="600" width="40" height="160" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="800" y="720" width="70" height="40" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="800,560 836,524 836,854 800,890" fill="#d6d6d6" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="540,560 576,524 836,524 800,560" fill="#f4f4f4" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="540" y="560" width="260" height="330" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <g clip-path="url(#s5-clip)"><rect id="s5-fill" x="546" y="600" width="248" height="284" fill="#ead9b0"/></g>
+  <defs><clipPath id="s5-clip"><rect x="546" y="566" width="248" height="318"/></clipPath></defs>
+</g>
+<g transform="translate(0 -75)"><g id="s5-card">
+  <rect x="380" y="90" width="560" height="380" rx="26" fill="#2a1f4a" stroke="#ffd23f" stroke-width="12"/>
+  <text x="660" y="160" text-anchor="middle" font-family="Lilita One" font-size="44" fill="#ffd23f">LEGENDARY ITEM</text>
+  <g >
+  <polygon points="710,210 734,186 734,316 710,340" fill="#c9b48a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="600,210 624,186 734,186 710,210" fill="#f6ead0" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="600" y="210" width="110" height="130" fill="#ead9b0" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <text x="660" y="420" text-anchor="middle" font-family="Lilita One" font-size="52" fill="#ffffff">Pasta Water</text>
+</g></g>
+</svg>
+          <div class="copy" id="s5-copy">
+            <span class="step">STEP 5/6</span>
+            <span class="title" id="s5-title">SAVE THE WATER</span>
+          </div>
+          <div class="chat" id="s5-chat"><span class="who">ChefBlox:</span> Save a mug of pasta water. Secret item!</div>
+          <div class="xp" id="s5-xp">+50 XP</div>
+        </div>
+      </section>
+      <section id="s6" class="clip scene" data-start="24.2" data-duration="5.8" data-track-index="1">
+        <div class="wrap" id="s6-wrap">
+          <svg class="world" id="s6-art" viewBox="0 0 1080 990">
+<g id="s6-toss">
+  <rect x="580" y="560" width="22" height="90" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(-25 591 605)"/>
+  <rect x="630" y="540" width="22" height="100" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(15 641 590)"/>
+  <rect x="690" y="550" width="22" height="95" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(-10 701 597)"/>
+  <rect x="750" y="545" width="22" height="100" fill="#f5c24c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round" transform="rotate(30 761 595)"/>
+  <g >
+  <polygon points="730,560 752,538 752,608 730,630" fill="#b8301c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="640,560 662,538 752,538 730,560" fill="#ff6a52" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="640" y="560" width="90" height="70" fill="#e2452c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+</g>
+<g id="s6-pan">
+  <rect x="910" y="760" width="150" height="34" fill="#2f2f2f" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <g >
+  <polygon points="910,720 950,680 950,790 910,830" fill="#262626" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="470,720 510,680 950,680 910,720" fill="#555555" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="470" y="720" width="440" height="110" fill="#3a3a3a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+  <polygon points="495,716 535,688 885,688 845,716" fill="#e2452c" stroke="#1d1d1d" stroke-width="4"/>
+</g>
+<rect id="s6-c0" x="690" y="520" width="26" height="26" fill="#e2452c" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c1" x="690" y="520" width="26" height="26" fill="#ffd23f" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c2" x="690" y="520" width="26" height="26" fill="#45b4f0" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c3" x="690" y="520" width="26" height="26" fill="#7dff6a" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c4" x="690" y="520" width="26" height="26" fill="#ff7ad9" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c5" x="690" y="520" width="26" height="26" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c6" x="690" y="520" width="26" height="26" fill="#e2452c" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c7" x="690" y="520" width="26" height="26" fill="#ffd23f" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c8" x="690" y="520" width="26" height="26" fill="#45b4f0" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c9" x="690" y="520" width="26" height="26" fill="#7dff6a" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c10" x="690" y="520" width="26" height="26" fill="#ff7ad9" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c11" x="690" y="520" width="26" height="26" fill="#ffffff" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c12" x="690" y="520" width="26" height="26" fill="#e2452c" stroke="#1d1d1d" stroke-width="4"/><rect id="s6-c13" x="690" y="520" width="26" height="26" fill="#ffd23f" stroke="#1d1d1d" stroke-width="4"/>
+</svg>
+          <div class="copy" id="s6-copy">
+            <span class="step">STEP 6/6</span>
+            <span class="title" id="s6-title">TOSS WITH SAUCE</span>
+          </div>
+          <div class="chat" id="s6-chat"><span class="who">ChefBlox:</span> Toss with sauce + a splash of that water.</div>
+          <div class="xp" id="s6-xp">+50 XP</div>
+        </div>
+      </section>
+
+      <div id="avlayer" class="clip avwrap" data-start="0" data-duration="30" data-track-index="3">
+        <svg viewBox="0 0 1080 990"><ellipse cx="215" cy="895" rx="120" ry="16" fill="#1d1d1d" opacity="0.25"/><g id="av">
+  <g id="av-legs">
+    <rect x="152" y="760" width="56" height="130" fill="#2d4a8a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="214" y="760" width="56" height="130" fill="#2d4a8a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <g id="av-body">
+    <g >
+  <polygon points="290,600 312,578 312,748 290,770" fill="#d9d9d9" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="130,600 152,578 312,578 290,600" fill="#f2f2f2" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="130" y="600" width="160" height="170" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+    <rect x="152" y="640" width="116" height="130" fill="#e2452c" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="186" y="680" width="48" height="34" fill="#c22f1a" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <g id="av-larm"><rect x="84" y="604" width="46" height="150" fill="#ffd9a8" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect x="84" y="604" width="46" height="50" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/></g>
+  <g id="av-rarm"><rect x="290" y="604" width="46" height="150" fill="#ffd9a8" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/><rect x="290" y="604" width="46" height="50" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/></g>
+  <g id="av-head">
+    <g >
+  <polygon points="280,462 302,440 302,574 280,596" fill="#e8b985" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="140,462 162,440 302,440 280,462" fill="#ffe7c7" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="140" y="462" width="140" height="134" fill="#ffd9a8" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+</g>
+    <rect x="172" y="505" width="20" height="30" fill="#1d1d1d"/>
+    <rect x="228" y="505" width="20" height="30" fill="#1d1d1d"/>
+    <path d="M180 556 q30 24 60 0" fill="none" stroke="#1d1d1d" stroke-width="8" stroke-linecap="round"/>
+    <g id="av-hat">
+      <rect x="146" y="420" width="128" height="44" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+      <rect x="138" y="352" width="62" height="72" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+      <rect x="190" y="330" width="62" height="94" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+      <rect x="240" y="352" width="54" height="72" fill="#ffffff" stroke="#1d1d1d" stroke-width="6" stroke-linejoin="round"/>
+    </g>
+  </g>
+</g></svg>
+      </div>
+
+      <div id="hud" class="clip hud" data-start="0" data-duration="30" data-track-index="5">
+        <div class="quest" id="quest">
+          <span class="qtitle">QUEST: PERFECT PASTA</span>
+          <span class="lvl" id="lvl1">LVL 1</span>
+          <span class="lvl" id="lvl2">LVL 2</span>
+          <div class="qbar"><span class="qfill" id="qfill"></span></div>
+          <span class="qn" id="q0">0/6</span><span class="qn" id="q1">1/6</span><span class="qn" id="q2">2/6</span><span class="qn" id="q3">3/6</span><span class="qn" id="q4">4/6</span><span class="qn" id="q5">5/6</span><span class="qn" id="q6">6/6</span>
+        </div>
+      </div>
+
+      <div id="finale" class="clip hud" data-start="27.4" data-duration="2.6" data-track-index="6">
+        <div class="done"><span class="done-big" id="done-big">QUEST<br>COMPLETE!</span><span class="lvlup" id="lvlup">LEVEL UP!</span></div>
+        <div class="toast" id="toast"><b>ACHIEVEMENT UNLOCKED</b><span>Pasta Pro</span></div>
+      </div>
+
+      <audio id="mix" src="assets/mix.wav" data-start="0" data-duration="30" data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const S = [0, 3.0, 7.0, 11.2, 15.4, 20.0, 24.2];
+      const D = [3.0, 4.0, 4.2, 4.2, 4.6, 4.2, 5.8];
+      const TC = [null, 2.9, 2.6, 2.7, 3.2, 2.8, 2.7];
+      const C = "50% 50%";
+
+      // ---- ambient: clouds drift, avatar idle bob ----
+      tl.to("#cl0", { x: 120, duration: 30, ease: "none" }, 0);
+      tl.to("#cl1", { x: -140, duration: 30, ease: "none" }, 0);
+      tl.to("#cl2", { x: 90, duration: 30, ease: "none" }, 0);
+      tl.to("#av", { y: -10, duration: 0.45, repeat: 59, yoyo: true, ease: "sine.inOut" }, 0);
+
+      // ---- HUD ----
+      tl.from("#quest", { y: -260, duration: 0.5, ease: "back.out(1.6)" }, 0.05);
+      tl.fromTo("#qfill", { scaleX: 0 }, { scaleX: 0.001, duration: 0.01, transformOrigin: "0% 50%" }, 0);
+      for (let i = 1; i <= 6; i++) {
+        const t = S[i] + TC[i];
+        tl.to("#qfill", { scaleX: i / 6, duration: 0.35, ease: "power2.out", transformOrigin: "0% 50%" }, t);
+        tl.to(`#q${i-1}`, { opacity: 0, duration: 0.05 }, t);
+        tl.fromTo(`#q${i}`, { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)", transformOrigin: C }, t);
+        tl.fromTo(`#s${i}-xp`, { opacity: 0, y: 40, scale: 0.6 }, { opacity: 1, y: -60, scale: 1, duration: 0.45, ease: "back.out(2)", transformOrigin: C }, t + 0.05);
+        tl.to(`#s${i}-xp`, { opacity: 0, y: -140, duration: 0.3, ease: "power2.in" }, t + 0.75);
+      }
+      tl.to("#lvl1", { opacity: 0, duration: 0.05 }, 27.75);
+      tl.fromTo("#lvl2", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2.5)", transformOrigin: C }, 27.75);
+
+      // ---- per-scene in/out ----
+      for (let i = 0; i <= 6; i++) {
+        tl.from(`#s${i}-art`, { scale: 0.8, opacity: 0, duration: 0.45, ease: "back.out(1.7)", transformOrigin: "65% 70%" }, S[i] + 0.02);
+        tl.from(`#s${i} .step`, { scale: 0, duration: 0.3, ease: "back.out(2.5)", transformOrigin: C }, S[i] + 0.12);
+        tl.from(`#s${i}-title`, { y: 80, scale: 0.6, opacity: 0, duration: 0.4, ease: "back.out(2)", transformOrigin: C }, S[i] + 0.18);
+        tl.from(`#s${i}-chat`, { x: -120, opacity: 0, duration: 0.35, ease: "power3.out" }, S[i] + 0.3);
+        if (i < 6) tl.to(`#s${i}-wrap`, { opacity: 0, x: -80, duration: 0.22, ease: "power2.in" }, S[i] + D[i] - 0.22);
+      }
+
+      // ---- avatar gestures ----
+      tl.to("#av-rarm", { rotation: -150, duration: 0.25, ease: "power2.out", svgOrigin: "313 615" }, 0.3);
+      tl.to("#av-rarm", { rotation: -120, duration: 0.18, repeat: 5, yoyo: true, ease: "sine.inOut", svgOrigin: "313 615" }, 0.55);
+      tl.to("#av-rarm", { rotation: 0, duration: 0.25, ease: "power2.in", svgOrigin: "313 615" }, 1.7);
+      for (let i = 1; i <= 6; i++) {  // point at the object each step
+        tl.to("#av-rarm", { rotation: -75, duration: 0.25, ease: "back.out(2)", svgOrigin: "313 615" }, S[i] + 0.35);
+        tl.to("#av-rarm", { rotation: 0, duration: 0.25, ease: "power2.in", svgOrigin: "313 615" }, S[i] + 1.5);
+        tl.to("#av-head", { rotation: 6, duration: 0.2, repeat: 1, yoyo: true, svgOrigin: "210 595" }, S[i] + 0.4);
+      }
+
+      // ---- S0 hook ----
+      tl.to("#s0-rays", { rotation: 45, duration: 3, ease: "none", svgOrigin: "700 560" }, 0);
+      tl.to("#s0-item", { y: -24, duration: 0.5, repeat: 5, yoyo: true, ease: "sine.inOut" }, 0.3);
+
+      // ---- S1 boil ----
+      for (let k = 0; k < 5; k++) {
+        tl.to(`#s1-f${k}`, { scaleY: 1.35, duration: 0.16 + k * 0.02, repeat: 21, yoyo: true, ease: "steps(2)", transformOrigin: "50% 100%" }, S[1] + 0.1);
+        tl.fromTo(`#s1-b${k}`, { scale: 0 }, { scale: 1.2, duration: 0.4, repeat: 7, yoyo: true, ease: "steps(3)", transformOrigin: C }, S[1] + 0.3 + k * 0.12);
+      }
+      for (let k = 0; k < 3; k++) {
+        tl.fromTo(`#s1-st${k}`, { y: 40, opacity: 0.9 }, { y: -200, opacity: 0, duration: 1.2, repeat: 2, ease: "power1.out" }, S[1] + 0.4 + k * 0.3);
+      }
+      tl.to("#s1-pot", { y: -5, duration: 0.1, repeat: 29, yoyo: true, ease: "steps(1)" }, S[1] + 0.5);
+
+      // ---- S2 salt ----
+      for (let k = 0; k < 5; k++) tl.to(`#s2-f${k}`, { scaleY: 1.3, duration: 0.18, repeat: 21, yoyo: true, ease: "steps(2)", transformOrigin: "50% 100%" }, S[2]);
+      tl.from("#s2-shaker", { y: -400, duration: 0.45, ease: "bounce.out" }, S[2] + 0.1);
+      tl.to("#s2-shaker", { rotation: 160, duration: 0.35, ease: "back.out(1.5)", svgOrigin: "688 210" }, S[2] + 0.62);
+      tl.to("#s2-shaker", { y: "+=26", duration: 0.12, repeat: 11, yoyo: true, ease: "sine.inOut" }, S[2] + 1.0);
+      for (let k = 0; k < 6; k++) tl.fromTo(`#s2-g${k}`, { y: -40, opacity: 0 }, { y: 280, opacity: 1, duration: 0.55, repeat: 3, ease: "power2.in" }, S[2] + 1.0 + k * 0.08);
+      tl.fromTo("#s2-flavor", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(2.5)" }, S[2] + 1.7);
+
+      // ---- S3 add + stir ----
+      for (let k = 0; k < 5; k++) tl.to(`#s3-f${k}`, { scaleY: 1.3, duration: 0.18, repeat: 21, yoyo: true, ease: "steps(2)", transformOrigin: "50% 100%" }, S[3]);
+      tl.from("#s3-sticks", { y: -560, duration: 0.5, ease: "power3.in" }, S[3] + 0.35);
+      tl.to("#s3-sticks", { y: 200, duration: 1.3, ease: "power2.out" }, S[3] + 0.9);
+      tl.from("#s3-spoon", { y: -500, duration: 0.4, ease: "bounce.out" }, S[3] + 1.1);
+      tl.fromTo("#s3-spoon", { rotation: -18 }, { rotation: 18, duration: 0.3, repeat: 9, yoyo: true, ease: "sine.inOut", svgOrigin: "865 640" }, S[3] + 1.5);
+
+      // ---- S4 timer ----
+      tl.from("#s4-box", { y: -600, duration: 0.5, ease: "bounce.out" }, S[4] + 0.05);
+      tl.to("#s4-t10", { opacity: 0, duration: 0.05, repeat: 5, yoyo: true }, S[4] + 1.0);
+      tl.to("#s4-t10", { opacity: 0, duration: 0.05 }, S[4] + 1.6);
+      tl.fromTo("#s4-t9", { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2.5)", svgOrigin: "630 710" }, S[4] + 1.6);
+      tl.fromTo("#s4-badge", { scale: 0, rotation: -10 }, { scale: 1, rotation: -3, duration: 0.4, ease: "back.out(2.5)", svgOrigin: "630 200" }, S[4] + 2.2);
+
+      // ---- S5 pasta water ----
+      tl.from("#s5-mug", { y: -600, duration: 0.5, ease: "bounce.out" }, S[5] + 0.05);
+      tl.fromTo("#s5-fill", { y: 290 }, { y: 0, duration: 1.3, ease: "steps(8)" }, S[5] + 0.6);
+      tl.fromTo("#s5-card", { opacity: 0, y: -120 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(2)" }, S[5] + 1.9);
+      tl.to("#s5-card", { y: -12, duration: 0.3, repeat: 3, yoyo: true, ease: "sine.inOut" }, S[5] + 2.4);
+
+      // ---- S6 toss + finale ----
+      tl.from("#s6-pan", { y: -600, duration: 0.5, ease: "bounce.out" }, S[6] + 0.05);
+      tl.from("#s6-toss", { opacity: 0, duration: 0.2 }, S[6] + 0.4);
+      [0.8, 1.7].forEach((t0, n) => {
+        tl.to("#s6-toss", { y: -260, rotation: n ? -20 : 20, duration: 0.35, ease: "power2.out", svgOrigin: "690 600" }, S[6] + t0);
+        tl.to("#s6-toss", { y: 0, rotation: 0, duration: 0.35, ease: "power2.in", svgOrigin: "690 600" }, S[6] + t0 + 0.35);
+        tl.to("#s6-pan", { y: 14, duration: 0.08, repeat: 1, yoyo: true }, S[6] + t0 + 0.7);
+      });
+      const E = 27.4;
+      tl.to(["#s6-copy", "#s6-chat"], { opacity: 0, duration: 0.2 }, E);
+      tl.from("#done-big", { scale: 0.2, opacity: 0, duration: 0.45, ease: "back.out(2.2)", transformOrigin: C }, E + 0.1);
+      tl.from("#lvlup", { scale: 0, duration: 0.35, ease: "back.out(2.5)", transformOrigin: C }, E + 0.35);
+      tl.from("#toast", { y: 400, opacity: 0, duration: 0.45, ease: "back.out(1.6)" }, E + 0.55);
+      const dirs = [[-320,-380],[-220,-460],[-90,-520],[60,-500],[200,-470],[320,-380],[-380,-200],[380,-220],[-260,-120],[260,-140],[-140,-300],[140,-320],[-30,-420],[30,-260]];
+      dirs.forEach(([dx, dy], k) => {
+        tl.fromTo(`#s6-c${k}`, { x: 0, y: 0, rotation: 0, opacity: 0 }, { x: dx, y: dy, rotation: 180 + k * 40, opacity: 1, duration: 0.6, ease: "power2.out", svgOrigin: "703 533" }, E + 0.3);
+        tl.to(`#s6-c${k}`, { y: dy + 260, opacity: 0, duration: 1.2, ease: "power1.in" }, E + 0.9);
+      });
+      tl.to("#av", { y: -140, duration: 0.3, ease: "power2.out" }, E + 0.35);
+      tl.to("#av", { y: 0, duration: 0.3, ease: "power2.in" }, E + 0.65);
+      tl.to("#av", { y: -90, duration: 0.25, ease: "power2.out" }, E + 1.0);
+      tl.to("#av", { y: 0, duration: 0.25, ease: "power2.in" }, E + 1.25);
+      tl.to(["#av-larm", "#av-rarm"], { rotation: (i) => (i ? -160 : 160), duration: 0.25, ease: "back.out(2)", svgOrigin: (i) => (i ? "313 615" : "107 615") }, E + 0.35);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

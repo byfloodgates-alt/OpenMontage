@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>How to Make Pasta in 30 Seconds</title>
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Inter Display"; font-weight: 900; src: url("assets/fonts/InterDisplay-Black.otf") format("opentype"); }
+      @font-face { font-family: "Inter Display"; font-weight: 800; src: url("assets/fonts/InterDisplay-ExtraBold.otf") format("opentype"); }
+      @font-face { font-family: "Inter"; font-weight: 600; src: url("assets/fonts/Inter-SemiBold.otf") format("opentype"); }
+      @font-face { font-family: "Inter"; font-weight: 700; src: url("assets/fonts/Inter-Bold.otf") format("opentype"); }
+      @font-face { font-family: "Inter"; font-weight: 800; src: url("assets/fonts/Inter-ExtraBold.otf") format("opentype"); }
+      :root {
+        --paper: #fff3df;
+        --paper-2: #ffe9c7;
+        --ink: #2b1a12;
+        --tomato: #e2452c;
+        --basil: #3f7d3a;
+        --pasta: #f5c24c;
+        --pasta-dk: #d99a1e;
+        --steel: #a9bccb;
+        --steel-dk: #7d93a6;
+        --water: #7ec8e3;
+        --cream: #fffbf3;
+        --wood: #b9773e;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        font-family: "Inter", system-ui, sans-serif;
+        color: var(--ink);
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+      .bg {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        background:
+          radial-gradient(circle at 50% 42%, var(--cream) 0%, var(--paper) 45%, var(--paper-2) 100%);
+      }
+      .bg-check {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 120px;
+        background:
+          repeating-linear-gradient(90deg, var(--tomato) 0 60px, var(--cream) 60px 120px);
+        opacity: 0.9;
+      }
+      .bg-check::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(0deg, rgba(255, 251, 243, 0.55) 0 30px, transparent 30px 60px);
+      }
+      /* header + progress */
+      #hud {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+      }
+      .brand {
+        position: absolute;
+        top: 92px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 800;
+        font-size: 34px;
+        letter-spacing: 0.32em;
+        color: var(--tomato);
+      }
+      .dots {
+        position: absolute;
+        top: 160px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 34px;
+      }
+      .dot {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 5px solid var(--ink);
+        box-sizing: border-box;
+        background: var(--cream);
+      }
+      .dot-fill {
+        position: absolute;
+        inset: 5px;
+        display: block;
+        border-radius: 50%;
+        background: var(--tomato);
+      }
+      /* scenes */
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+      }
+      .wrap {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+      }
+      .art {
+        position: absolute;
+        top: 250px;
+        left: 0;
+        display: block;
+        width: 1080px;
+        height: 1000px;
+      }
+      .copy {
+        position: absolute;
+        left: 80px;
+        right: 80px;
+        top: 1270px;
+        height: 480px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .step {
+        display: block;
+        font-weight: 800;
+        font-size: 36px;
+        letter-spacing: 0.22em;
+        color: var(--cream);
+        background: var(--ink);
+        padding: 12px 28px;
+        border-radius: 999px;
+      }
+      .head {
+        display: block;
+        margin-top: 30px;
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 900;
+        font-size: 112px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        max-width: 920px;
+      }
+      .head em {
+        font-style: normal;
+        color: var(--tomato);
+      }
+      .cap {
+        display: block;
+        margin-top: 34px;
+        font-weight: 600;
+        font-size: 44px;
+        line-height: 1.3;
+        max-width: 860px;
+        color: rgba(43, 26, 18, 0.78);
+      }
+      /* hook */
+      .hook-title {
+        position: absolute;
+        top: 1230px;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hook-line {
+        display: block;
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 900;
+        font-size: 176px;
+        line-height: 0.92;
+        letter-spacing: -0.03em;
+      }
+      .hook-line.red {
+        color: var(--tomato);
+      }
+      .pill {
+        display: block;
+        margin-top: 40px;
+        font-weight: 800;
+        font-size: 52px;
+        color: var(--ink);
+        background: var(--pasta);
+        border: 6px solid var(--ink);
+        padding: 14px 44px;
+        border-radius: 999px;
+      }
+      .end-title {
+        position: absolute;
+        top: 1300px;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .end-big {
+        display: block;
+        font-family: "Inter Display", "Inter", sans-serif;
+        font-weight: 900;
+        font-size: 150px;
+        line-height: 0.95;
+        color: var(--tomato);
+        letter-spacing: -0.03em;
+        text-align: center;
+      }
+      .end-small {
+        display: block;
+        margin-top: 30px;
+        font-weight: 700;
+        font-size: 46px;
+        color: var(--ink);
+      }
+      svg * {
+        vector-effect: non-scaling-stroke;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="30">
+      <!-- Persistent background -->
+      <div id="bg" class="clip bg" data-start="0" data-duration="30" data-track-index="0">
+        <div class="bg-check"></div>
+      </div>
+
+      <!-- HUD: brand + 6-step progress -->
+      <div id="hud" class="clip" data-start="0" data-duration="30" data-track-index="5">
+        <div id="brand" class="brand">PASTA 101</div>
+        <div id="dots" class="dots">
+          <div class="dot"><span id="df1" class="dot-fill"></span></div>
+          <div class="dot"><span id="df2" class="dot-fill"></span></div>
+          <div class="dot"><span id="df3" class="dot-fill"></span></div>
+          <div class="dot"><span id="df4" class="dot-fill"></span></div>
+          <div class="dot"><span id="df5" class="dot-fill"></span></div>
+          <div class="dot"><span id="df6" class="dot-fill"></span></div>
+        </div>
+      </div>
+
+      <!-- S0: Hook -->
+      <section id="s0" class="clip scene" data-start="0" data-duration="3" data-track-index="1">
+        <div class="wrap" id="s0-wrap">
+          <svg class="art" id="s0-art" viewBox="0 0 1080 1000">
+            <g id="s0-steam" fill="none" stroke="#2b1a12" stroke-width="9" stroke-linecap="round" opacity="0.5">
+              <path id="s0-st1" d="M430 330 q-30 -50 0 -100 q30 -50 0 -100" />
+              <path id="s0-st2" d="M540 310 q-30 -50 0 -100 q30 -50 0 -100" />
+              <path id="s0-st3" d="M650 330 q-30 -50 0 -100 q30 -50 0 -100" />
+            </g>
+            <g id="s0-plate">
+              <ellipse cx="540" cy="640" rx="400" ry="150" fill="#2b1a12" />
+              <ellipse cx="540" cy="620" rx="400" ry="150" fill="#fffbf3" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="620" rx="290" ry="100" fill="none" stroke="#e8dcc6" stroke-width="8" />
+            </g>
+            <g id="s0-pasta" stroke-linecap="round" fill="none">
+              <path d="M330 600 C 380 470, 520 470, 560 560 S 700 640, 740 540" stroke="#d99a1e" stroke-width="30" />
+              <path d="M330 600 C 380 470, 520 470, 560 560 S 700 640, 740 540" stroke="#f5c24c" stroke-width="20" />
+              <path d="M360 640 C 420 520, 560 520, 600 600 S 720 650, 760 590" stroke="#d99a1e" stroke-width="30" />
+              <path d="M360 640 C 420 520, 560 520, 600 600 S 720 650, 760 590" stroke="#f5c24c" stroke-width="20" />
+              <path d="M400 560 C 460 450, 600 460, 640 520 S 700 600, 720 500" stroke="#d99a1e" stroke-width="30" />
+              <path d="M400 560 C 460 450, 600 460, 640 520 S 700 600, 720 500" stroke="#f5c24c" stroke-width="20" />
+              <path d="M380 660 C 460 600, 620 690, 700 640" stroke="#d99a1e" stroke-width="30" />
+              <path d="M380 660 C 460 600, 620 690, 700 640" stroke="#f5c24c" stroke-width="20" />
+            </g>
+            <g id="s0-sauce">
+              <path d="M450 520 q40 -50 100 -30 q70 -10 80 40 q30 50 -30 70 q-50 30 -110 10 q-70 -20 -40 -90z" fill="#e2452c" stroke="#2b1a12" stroke-width="8" />
+              <circle cx="510" cy="540" r="14" fill="#ff7a5c" />
+              <circle cx="590" cy="560" r="10" fill="#ff7a5c" />
+            </g>
+            <g id="s0-basil">
+              <path d="M560 500 q50 -60 110 -30 q-40 60 -110 30z" fill="#3f7d3a" stroke="#2b1a12" stroke-width="7" />
+              <path d="M555 505 q-20 -70 30 -110 q30 60 -30 110z" fill="#5a9e4b" stroke="#2b1a12" stroke-width="7" />
+            </g>
+            <g id="s0-fork">
+              <rect x="800" y="250" width="26" height="330" rx="13" fill="#a9bccb" stroke="#2b1a12" stroke-width="8" />
+              <path d="M770 140 v110 q0 40 43 40 q43 0 43 -40 v-110" fill="none" stroke="#2b1a12" stroke-width="12" stroke-linecap="round" />
+              <path d="M813 140 v110" stroke="#2b1a12" stroke-width="12" stroke-linecap="round" />
+            </g>
+          </svg>
+          <div class="hook-title">
+            <span id="s0-l1" class="hook-line">PERFECT</span>
+            <span id="s0-l2" class="hook-line red">PASTA</span>
+            <span id="s0-pill" class="pill">in 30 seconds</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S1: Boil -->
+      <section id="s1" class="clip scene" data-start="3" data-duration="4" data-track-index="1">
+        <div class="wrap" id="s1-wrap">
+          <svg class="art" id="s1-art" viewBox="0 0 1080 1000">
+            <g fill="none" stroke="#2b1a12" stroke-width="9" stroke-linecap="round" opacity="0.45">
+              <path id="s1-st1" d="M420 330 q-30 -50 0 -100 q30 -50 0 -100" />
+              <path id="s1-st2" d="M540 300 q-30 -50 0 -100 q30 -50 0 -100" />
+              <path id="s1-st3" d="M660 330 q-30 -50 0 -100 q30 -50 0 -100" />
+            </g>
+            <rect x="150" y="880" width="780" height="44" rx="22" fill="#2b1a12" />
+            <g id="s1-flames">
+              <path id="s1-f1" d="M340 880 q-40 -50 0 -110 q40 60 0 110z" fill="#e2452c" stroke="#2b1a12" stroke-width="6" />
+              <path id="s1-f2" d="M470 880 q-45 -60 0 -130 q45 70 0 130z" fill="#f5c24c" stroke="#2b1a12" stroke-width="6" />
+              <path id="s1-f3" d="M610 880 q-45 -60 0 -130 q45 70 0 130z" fill="#e2452c" stroke="#2b1a12" stroke-width="6" />
+              <path id="s1-f4" d="M740 880 q-40 -50 0 -110 q40 60 0 110z" fill="#f5c24c" stroke="#2b1a12" stroke-width="6" />
+            </g>
+            <g id="s1-pot">
+              <rect x="150" y="470" width="90" height="40" rx="20" fill="#7d93a6" stroke="#2b1a12" stroke-width="9" />
+              <rect x="840" y="470" width="90" height="40" rx="20" fill="#7d93a6" stroke="#2b1a12" stroke-width="9" />
+              <path d="M220 420 L220 760 Q220 820 290 820 L790 820 Q860 820 860 760 L860 420 Z" fill="#a9bccb" stroke="#2b1a12" stroke-width="10" />
+              <rect x="260" y="470" width="40" height="300" rx="20" fill="#fffbf3" opacity="0.5" />
+              <ellipse cx="540" cy="420" rx="320" ry="70" fill="#7d93a6" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="430" rx="285" ry="52" fill="#7ec8e3" stroke="#2b1a12" stroke-width="6" />
+              <circle id="s1-b1" cx="400" cy="430" r="22" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+              <circle id="s1-b2" cx="500" cy="415" r="16" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+              <circle id="s1-b3" cx="600" cy="440" r="24" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+              <circle id="s1-b4" cx="690" cy="420" r="14" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+              <circle id="s1-b5" cx="540" cy="450" r="12" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+              <circle id="s1-b6" cx="450" cy="455" r="10" fill="#fffbf3" stroke="#2b1a12" stroke-width="5" />
+            </g>
+          </svg>
+          <div class="copy">
+            <span class="step">STEP 1</span>
+            <span class="head">Big pot. <em>Rolling boil.</em></span>
+            <span class="cap">Bring a big pot of water to a rolling boil.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S2: Salt -->
+      <section id="s2" class="clip scene" data-start="7" data-duration="4.2" data-track-index="1">
+        <div class="wrap" id="s2-wrap">
+          <svg class="art" id="s2-art" viewBox="0 0 1080 1000">
+            <g id="s2-pot">
+              <path d="M220 620 L220 860 Q220 920 290 920 L790 920 Q860 920 860 860 L860 620 Z" fill="#a9bccb" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="620" rx="320" ry="70" fill="#7d93a6" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="630" rx="285" ry="52" fill="#7ec8e3" stroke="#2b1a12" stroke-width="6" />
+            </g>
+            <g id="s2-grains" fill="#fffbf3" stroke="#2b1a12" stroke-width="4">
+              <rect id="s2-g1" x="470" y="330" width="16" height="16" rx="3" />
+              <rect id="s2-g2" x="510" y="320" width="14" height="14" rx="3" />
+              <rect id="s2-g3" x="545" y="335" width="16" height="16" rx="3" />
+              <rect id="s2-g4" x="490" y="350" width="12" height="12" rx="3" />
+              <rect id="s2-g5" x="530" y="355" width="14" height="14" rx="3" />
+              <rect id="s2-g6" x="565" y="320" width="12" height="12" rx="3" />
+              <rect id="s2-g7" x="455" y="345" width="12" height="12" rx="3" />
+              <rect id="s2-g8" x="585" y="345" width="14" height="14" rx="3" />
+            </g>
+            <g id="s2-shaker">
+              <rect x="560" y="60" width="190" height="250" rx="40" fill="#fffbf3" stroke="#2b1a12" stroke-width="10" />
+              <rect x="580" y="140" width="150" height="130" rx="20" fill="#ffe9c7" />
+              <text x="655" y="240" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" font-weight="900" font-size="110" fill="#e2452c">S</text>
+              <path d="M570 70 Q570 0 655 0 Q740 0 740 70 Z" fill="#a9bccb" stroke="#2b1a12" stroke-width="10" />
+              <circle cx="630" cy="35" r="7" fill="#2b1a12" />
+              <circle cx="655" cy="22" r="7" fill="#2b1a12" />
+              <circle cx="680" cy="35" r="7" fill="#2b1a12" />
+            </g>
+            <g id="s2-tag">
+              <rect x="110" y="140" width="340" height="150" rx="28" fill="#3f7d3a" stroke="#2b1a12" stroke-width="8" />
+              <text x="280" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="42" fill="#fffbf3">≈ 1 tbsp</text>
+              <text x="280" y="255" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600" font-size="32" fill="#fffbf3">per 4 qt water</text>
+            </g>
+          </svg>
+          <div class="copy">
+            <span class="step">STEP 2</span>
+            <span class="head">Salt it <em>generously.</em></span>
+            <span class="cap">It should taste pleasantly salty.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S3: Add + stir -->
+      <section id="s3" class="clip scene" data-start="11.2" data-duration="4.5" data-track-index="1">
+        <div class="wrap" id="s3-wrap">
+          <svg class="art" id="s3-art" viewBox="0 0 1080 1000">
+            <g id="s3-strands">
+              <rect id="s3-p1" x="380" y="80" width="18" height="420" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(-14 389 290)" />
+              <rect id="s3-p2" x="430" y="60" width="18" height="440" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(-7 439 280)" />
+              <rect id="s3-p3" x="480" y="50" width="18" height="450" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(-2 489 275)" />
+              <rect id="s3-p4" x="530" y="50" width="18" height="450" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(3 539 275)" />
+              <rect id="s3-p5" x="580" y="60" width="18" height="440" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(8 589 280)" />
+              <rect id="s3-p6" x="630" y="80" width="18" height="420" rx="9" fill="#f5c24c" stroke="#d99a1e" stroke-width="5" transform="rotate(14 639 290)" />
+            </g>
+            <g id="s3-pot">
+              <rect x="150" y="570" width="90" height="40" rx="20" fill="#7d93a6" stroke="#2b1a12" stroke-width="9" />
+              <rect x="840" y="570" width="90" height="40" rx="20" fill="#7d93a6" stroke="#2b1a12" stroke-width="9" />
+              <path d="M220 520 L220 860 Q220 920 290 920 L790 920 Q860 920 860 860 L860 520 Z" fill="#a9bccb" stroke="#2b1a12" stroke-width="10" />
+              <rect x="260" y="570" width="40" height="300" rx="20" fill="#fffbf3" opacity="0.5" />
+            </g>
+            <g id="s3-spoon">
+              <rect x="700" y="160" width="34" height="420" rx="17" fill="#b9773e" stroke="#2b1a12" stroke-width="9" />
+              <ellipse cx="717" cy="560" rx="58" ry="80" fill="#b9773e" stroke="#2b1a12" stroke-width="9" />
+            </g>
+            <g id="s3-rim">
+              <path d="M220 520 A320 70 0 0 0 860 520" fill="none" stroke="#2b1a12" stroke-width="10" />
+            </g>
+          </svg>
+          <div class="copy">
+            <span class="step">STEP 3</span>
+            <span class="head">Add pasta. <em>Stir.</em></span>
+            <span class="cap">Stir for the first minute so it doesn't stick.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S4: One minute less -->
+      <section id="s4" class="clip scene" data-start="15.7" data-duration="4.7" data-track-index="1">
+        <div class="wrap" id="s4-wrap">
+          <svg class="art" id="s4-art" viewBox="0 0 1080 1000">
+            <g id="s4-box">
+              <path d="M300 160 L780 160 L800 900 L280 900 Z" fill="#2b1a12" transform="translate(16 16)" />
+              <path d="M300 160 L780 160 L800 900 L280 900 Z" fill="#e2452c" stroke="#2b1a12" stroke-width="10" />
+              <rect x="330" y="200" width="420" height="110" rx="20" fill="#fffbf3" stroke="#2b1a12" stroke-width="8" />
+              <text x="540" y="278" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" font-weight="900" font-size="72" fill="#2b1a12">SPAGHETTI</text>
+              <g stroke="#f5c24c" stroke-width="14" stroke-linecap="round">
+                <path d="M380 360 L380 520" /><path d="M420 360 L420 520" /><path d="M460 360 L460 520" />
+                <path d="M500 360 L500 520" /><path d="M540 360 L540 520" /><path d="M580 360 L580 520" />
+                <path d="M620 360 L620 520" /><path d="M660 360 L660 520" /><path d="M700 360 L700 520" />
+              </g>
+              <rect x="340" y="590" width="400" height="230" rx="24" fill="#fffbf3" stroke="#2b1a12" stroke-width="8" />
+              <text x="540" y="660" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="40" fill="#2b1a12">COOK</text>
+              <text id="s4-ten" x="540" y="780" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" font-weight="900" font-size="120" fill="#2b1a12">10 min</text>
+              <rect id="s4-strike" x="370" y="725" width="340" height="18" rx="9" fill="#e2452c" />
+            </g>
+            <g id="s4-stamp">
+              <circle cx="860" cy="520" r="140" fill="#3f7d3a" stroke="#2b1a12" stroke-width="10" />
+              <circle cx="860" cy="520" r="114" fill="none" stroke="#fffbf3" stroke-width="5" stroke-dasharray="12 10" />
+              <text x="860" y="535" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" font-weight="900" font-size="104" fill="#fffbf3">9</text>
+              <text x="860" y="590" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="40" fill="#fffbf3">MIN</text>
+            </g>
+            <g id="s4-dente">
+              <rect x="80" y="760" width="330" height="96" rx="48" fill="#f5c24c" stroke="#2b1a12" stroke-width="8" />
+              <text x="245" y="822" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="44" fill="#2b1a12">al dente ✓</text>
+            </g>
+          </svg>
+          <div class="copy">
+            <span class="step">STEP 4</span>
+            <span class="head">One minute <em>less.</em></span>
+            <span class="cap">Cook 1 minute under the package time, so it keeps a little bite.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S5: Save pasta water -->
+      <section id="s5" class="clip scene" data-start="20.4" data-duration="4.2" data-track-index="1">
+        <div class="wrap" id="s5-wrap">
+          <svg class="art" id="s5-art" viewBox="0 0 1080 1000">
+            <g id="s5-ladle">
+              <rect x="120" y="140" width="420" height="34" rx="17" fill="#a9bccb" stroke="#2b1a12" stroke-width="9" transform="rotate(-8 330 157)" />
+              <path d="M520 130 q0 130 110 130 q110 0 110 -130 z" fill="#a9bccb" stroke="#2b1a12" stroke-width="10" />
+              <path d="M540 140 q10 95 90 95 q80 0 90 -95 z" fill="#ead9b0" />
+            </g>
+            <rect id="s5-stream" x="612" y="250" width="34" height="400" rx="17" fill="#ead9b0" stroke="#2b1a12" stroke-width="6" />
+            <g id="s5-mug">
+              <path d="M820 560 q130 0 130 120 q0 120 -130 120" fill="none" stroke="#2b1a12" stroke-width="44" />
+              <path d="M820 560 q130 0 130 120 q0 120 -130 120" fill="none" stroke="#fffbf3" stroke-width="26" />
+              <path d="M410 520 L850 520 L830 900 Q825 930 795 930 L465 930 Q435 930 430 900 Z" fill="#fffbf3" stroke="#2b1a12" stroke-width="10" />
+              <defs><clipPath id="s5-clip"><path d="M422 520 L838 520 L830 895 Q826 918 796 918 L464 918 Q434 918 430 895 Z" /></clipPath></defs>
+              <g id="s5-fillwrap" clip-path="url(#s5-clip)">
+                <path id="s5-fill" d="M422 640 L838 640 L830 895 Q826 918 796 918 L464 918 Q434 918 430 895 Z" fill="#ead9b0" />
+              </g>
+              <ellipse cx="630" cy="520" rx="220" ry="34" fill="#fffbf3" stroke="#2b1a12" stroke-width="10" />
+              <rect x="460" y="600" width="30" height="240" rx="15" fill="#ffffff" opacity="0.6" />
+            </g>
+            <g id="s5-gold">
+              <rect x="80" y="320" width="380" height="104" rx="52" fill="#f5c24c" stroke="#2b1a12" stroke-width="8" />
+              <text x="270" y="388" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="46" fill="#2b1a12">liquid gold</text>
+            </g>
+          </svg>
+          <div class="copy">
+            <span class="step">STEP 5</span>
+            <span class="head">Save the <em>pasta water.</em></span>
+            <span class="cap">Before draining, save a mug of the starchy water.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- S6: Toss + end card -->
+      <section id="s6" class="clip scene" data-start="24.6" data-duration="5.4" data-track-index="1">
+        <div class="wrap" id="s6-wrap">
+          <svg class="art" id="s6-art" viewBox="0 0 1080 1000">
+            <g id="s6-toss">
+              <g stroke-linecap="round" fill="none">
+                <path d="M330 520 C 380 400, 520 400, 560 480 S 700 560, 740 460" stroke="#d99a1e" stroke-width="30" />
+                <path d="M330 520 C 380 400, 520 400, 560 480 S 700 560, 740 460" stroke="#f5c24c" stroke-width="20" />
+                <path d="M360 560 C 420 440, 560 440, 600 520 S 720 570, 760 510" stroke="#d99a1e" stroke-width="30" />
+                <path d="M360 560 C 420 440, 560 440, 600 520 S 720 570, 760 510" stroke="#f5c24c" stroke-width="20" />
+                <path d="M400 480 C 460 370, 600 380, 640 440 S 700 520, 720 420" stroke="#d99a1e" stroke-width="30" />
+                <path d="M400 480 C 460 370, 600 380, 640 440 S 700 520, 720 420" stroke="#f5c24c" stroke-width="20" />
+              </g>
+              <path d="M440 450 q40 -50 100 -30 q70 -10 80 40 q30 50 -30 70 q-50 30 -110 10 q-70 -20 -40 -90z" fill="#e2452c" stroke="#2b1a12" stroke-width="8" />
+              <path d="M555 430 q50 -60 110 -30 q-40 60 -110 30z" fill="#3f7d3a" stroke="#2b1a12" stroke-width="7" />
+            </g>
+            <g id="s6-drops" fill="#e2452c" stroke="#2b1a12" stroke-width="5">
+              <circle id="s6-d1" cx="300" cy="420" r="16" />
+              <circle id="s6-d2" cx="790" cy="400" r="14" />
+              <circle id="s6-d3" cx="420" cy="330" r="11" />
+              <circle id="s6-d4" cx="680" cy="320" r="12" />
+            </g>
+            <g id="s6-pan">
+              <rect x="840" y="610" width="230" height="46" rx="23" fill="#2b1a12" transform="rotate(-6 840 633)" />
+              <path d="M200 600 Q200 760 360 760 L720 760 Q880 760 880 600 Z" fill="#3a2a22" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="600" rx="345" ry="60" fill="#4b3a30" stroke="#2b1a12" stroke-width="10" />
+              <ellipse cx="540" cy="605" rx="250" ry="34" fill="#e2452c" opacity="0.85" />
+            </g>
+            <g id="s6-sparkles" fill="#f5c24c" stroke="#2b1a12" stroke-width="5">
+              <path id="s6-k1" d="M180 250 l14 34 34 14 -34 14 -14 34 -14 -34 -34 -14 34 -14z" />
+              <path id="s6-k2" d="M880 200 l12 28 28 12 -28 12 -12 28 -12 -28 -28 -12 28 -12z" />
+              <path id="s6-k3" d="M920 470 l10 24 24 10 -24 10 -10 24 -10 -24 -24 -10 24 -10z" />
+            </g>
+          </svg>
+          <div class="copy" id="s6-copy">
+            <span class="step">STEP 6</span>
+            <span class="head">Toss with <em>sauce.</em></span>
+            <span class="cap">Add a splash of that pasta water. Glossy, silky, done.</span>
+          </div>
+          <div class="end-title" id="s6-end">
+            <span id="s6-end-big" class="end-big">Buon appetito!</span>
+            <span id="s6-end-small" class="end-small">Save this for dinner tonight</span>
+          </div>
+        </div>
+      </section>
+
+      <audio id="mix" src="assets/mix.wav" data-start="0" data-duration="30" data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const S = [0, 3, 7, 11.2, 15.7, 20.4, 24.6];
+      const D = [3, 4, 4.2, 4.5, 4.7, 4.2, 5.4];
+      const C = "50% 50%";
+
+      // ---------- HUD ----------
+      tl.from("#brand", { y: -30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1);
+      tl.from("#dots", { y: -20, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.25);
+      for (let i = 1; i <= 6; i++) {
+        tl.fromTo(`#df${i}`, { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.4)" }, S[i] + 0.1);
+      }
+
+      // ---------- Common scene in/out ----------
+      for (let i = 1; i <= 6; i++) {
+        tl.from(`#s${i}-art`, { scale: 0.86, opacity: 0, duration: 0.5, ease: "back.out(1.5)", transformOrigin: C }, S[i] + 0.02);
+        tl.from(`#s${i} .step`, { y: 30, opacity: 0, duration: 0.35, ease: "power2.out" }, S[i] + 0.12);
+        tl.from(`#s${i} .head`, { y: 60, opacity: 0, duration: 0.45, ease: "power3.out" }, S[i] + 0.2);
+        tl.from(`#s${i} .cap`, { y: 20, opacity: 0, duration: 0.4, ease: "power2.out" }, S[i] + 0.38);
+        if (i < 6) {
+          tl.to(`#s${i}-wrap`, { opacity: 0, y: -40, duration: 0.25, ease: "power2.in" }, S[i] + D[i] - 0.25);
+        }
+      }
+
+      // ---------- S0 Hook ----------
+      tl.from("#s0-plate", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.7)", transformOrigin: C }, 0.05);
+      tl.from("#s0-pasta", { y: -260, opacity: 0, duration: 0.55, ease: "bounce.out" }, 0.25);
+      tl.from("#s0-sauce", { scale: 0, duration: 0.4, ease: "back.out(2.5)", transformOrigin: C }, 0.7);
+      tl.from("#s0-basil", { scale: 0, rotation: -60, duration: 0.4, ease: "back.out(2.5)", transformOrigin: "0% 100%" }, 0.9);
+      tl.from("#s0-fork", { x: 200, rotation: 25, opacity: 0, duration: 0.5, ease: "power3.out", transformOrigin: C }, 0.6);
+      ["#s0-st1", "#s0-st2", "#s0-st3"].forEach((s, k) => {
+        tl.fromTo(s, { y: 40, opacity: 0.9 }, { y: -110, opacity: 0, duration: 1.1, repeat: 1, ease: "sine.out" }, 0.6 + k * 0.25);
+      });
+      tl.from("#s0-l1", { y: 120, opacity: 0, duration: 0.45, ease: "power4.out" }, 0.15);
+      tl.from("#s0-l2", { y: 120, opacity: 0, duration: 0.45, ease: "power4.out" }, 0.3);
+      tl.from("#s0-pill", { scale: 0, rotation: -10, duration: 0.45, ease: "back.out(2.2)", transformOrigin: C }, 0.75);
+      tl.to("#s0-wrap", { opacity: 0, scale: 1.06, duration: 0.25, ease: "power2.in", transformOrigin: C }, 2.75);
+
+      // ---------- S1 Boil ----------
+      ["#s1-f1", "#s1-f2", "#s1-f3", "#s1-f4"].forEach((f, k) => {
+        tl.to(f, { scaleY: 1.2, scaleX: 0.9, duration: 0.18 + k * 0.02, repeat: 19, yoyo: true, ease: "sine.inOut", transformOrigin: "50% 100%" }, S[1] + 0.1);
+      });
+      ["#s1-b1", "#s1-b2", "#s1-b3", "#s1-b4", "#s1-b5", "#s1-b6"].forEach((b, k) => {
+        tl.fromTo(b, { scale: 0, opacity: 1 }, { scale: 1.3, opacity: 0, duration: 0.55, repeat: 5, ease: "power1.out", transformOrigin: C }, S[1] + 0.3 + k * 0.11);
+      });
+      ["#s1-st1", "#s1-st2", "#s1-st3"].forEach((s, k) => {
+        tl.fromTo(s, { y: 40, opacity: 0.9 }, { y: -120, opacity: 0, duration: 1.2, repeat: 2, ease: "sine.out" }, S[1] + 0.4 + k * 0.3);
+      });
+      tl.to("#s1-pot", { y: -6, duration: 0.12, repeat: 23, yoyo: true, ease: "sine.inOut" }, S[1] + 0.6);
+
+      // ---------- S2 Salt ----------
+      tl.from("#s2-shaker", { x: 260, y: -200, rotation: 0, duration: 0.5, ease: "power3.out", transformOrigin: C }, S[2] + 0.1);
+      tl.to("#s2-shaker", { rotation: 150, duration: 0.45, ease: "back.out(1.6)", transformOrigin: "50% 40%" }, S[2] + 0.62);
+      tl.to("#s2-shaker", { x: "+=24", duration: 0.12, repeat: 11, yoyo: true, ease: "sine.inOut" }, S[2] + 1.1);
+      ["#s2-g1", "#s2-g2", "#s2-g3", "#s2-g4", "#s2-g5", "#s2-g6", "#s2-g7", "#s2-g8"].forEach((g, k) => {
+        tl.fromTo(g, { y: -60, opacity: 0 }, { y: 300, opacity: 1, duration: 0.6, repeat: 3, ease: "power2.in" }, S[2] + 1.0 + k * 0.08);
+      });
+      tl.from("#s2-tag", { scale: 0, rotation: -12, duration: 0.45, ease: "back.out(2.2)", transformOrigin: C }, S[2] + 1.6);
+
+      // ---------- S3 Add + stir ----------
+      tl.from("#s3-strands", { y: -520, duration: 0.6, ease: "power3.in" }, S[3] + 0.4);
+      tl.to("#s3-strands", { y: 180, duration: 1.4, ease: "power2.out" }, S[3] + 1.0);
+      tl.from("#s3-spoon", { opacity: 0, x: 120, duration: 0.4, ease: "power2.out" }, S[3] + 1.2);
+      tl.fromTo("#s3-spoon", { rotation: -14 }, { rotation: 14, duration: 0.38, repeat: 7, yoyo: true, ease: "sine.inOut", svgOrigin: "717 700" }, S[3] + 1.4);
+
+      // ---------- S4 One minute less ----------
+      tl.from("#s4-box", { rotation: -6, y: 60, duration: 0.5, ease: "back.out(1.6)", transformOrigin: C }, S[4] + 0.05);
+      tl.fromTo("#s4-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power3.out", svgOrigin: "370 734" }, S[4] + 1.0);
+      tl.to("#s4-ten", { opacity: 0.35, duration: 0.3 }, S[4] + 1.2);
+      tl.from("#s4-stamp", { scale: 2.4, opacity: 0, rotation: -25, duration: 0.4, ease: "power4.in", transformOrigin: C }, S[4] + 1.45);
+      tl.to("#s4-box", { x: -10, duration: 0.05, repeat: 5, yoyo: true }, S[4] + 1.85);
+      tl.from("#s4-dente", { x: -400, opacity: 0, duration: 0.5, ease: "back.out(1.8)" }, S[4] + 2.3);
+
+      // ---------- S5 Save pasta water ----------
+      tl.from("#s5-mug", { y: 200, opacity: 0, duration: 0.5, ease: "back.out(1.6)" }, S[5] + 0.05);
+      tl.from("#s5-ladle", { x: -300, rotation: 0, opacity: 0, duration: 0.5, ease: "power3.out" }, S[5] + 0.3);
+      tl.to("#s5-ladle", { rotation: 22, duration: 0.4, ease: "power2.inOut", svgOrigin: "330 157" }, S[5] + 0.8);
+      tl.fromTo("#s5-stream", { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.in", svgOrigin: "629 250" }, S[5] + 1.05);
+      tl.fromTo("#s5-fill", { y: 290 }, { y: 0, duration: 1.6, ease: "power1.inOut" }, S[5] + 1.2);
+      tl.to("#s5-stream", { scaleY: 0, duration: 0.3, ease: "power2.out", svgOrigin: "629 650" }, S[5] + 2.8);
+      tl.to("#s5-ladle", { rotation: 0, duration: 0.3 }, S[5] + 2.8);
+      tl.from("#s5-gold", { scale: 0, rotation: 10, duration: 0.45, ease: "back.out(2.2)", transformOrigin: C }, S[5] + 1.9);
+
+      // ---------- S6 Toss + end ----------
+      tl.from("#s6-pan", { y: 160, opacity: 0, duration: 0.45, ease: "back.out(1.5)" }, S[6] + 0.05);
+      tl.from("#s6-toss", { y: 260, opacity: 0, duration: 0.45, ease: "power2.out" }, S[6] + 0.2);
+      // two tosses
+      [0.9, 1.9].forEach((t0, n) => {
+        tl.to("#s6-toss", { y: -220, rotation: n ? -10 : 10, duration: 0.38, ease: "power2.out", transformOrigin: C }, S[6] + t0);
+        tl.to("#s6-toss", { y: 0, rotation: 0, duration: 0.38, ease: "power2.in" }, S[6] + t0 + 0.38);
+        tl.to("#s6-pan", { y: 14, duration: 0.1, repeat: 1, yoyo: true }, S[6] + t0 + 0.74);
+      });
+      ["#s6-d1", "#s6-d2", "#s6-d3", "#s6-d4"].forEach((d, k) => {
+        tl.fromTo(d, { scale: 0, y: 60 }, { scale: 1, y: -60, duration: 0.5, ease: "power2.out", transformOrigin: C }, S[6] + 1.0 + k * 0.05);
+        tl.to(d, { opacity: 0, y: 40, duration: 0.4 }, S[6] + 1.6 + k * 0.05);
+      });
+      // end card swap at ~28.0s
+      const E = 28.0;
+      tl.to("#s6-copy", { opacity: 0, y: -40, duration: 0.3, ease: "power2.in" }, E);
+      tl.from("#s6-end-big", { scale: 0.4, opacity: 0, duration: 0.5, ease: "back.out(2)", transformOrigin: C }, E + 0.2);
+      tl.from("#s6-end-small", { y: 30, opacity: 0, duration: 0.4, ease: "power2.out" }, E + 0.5);
+      ["#s6-k1", "#s6-k2", "#s6-k3"].forEach((k, n) => {
+        tl.fromTo(k, { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2.6)", transformOrigin: C }, E + 0.3 + n * 0.12);
+      });
+      tl.to("#s6-art", { y: -30, duration: 0.6, ease: "power2.out" }, E + 0.1);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+identity:
+  name: "Blocky Game"
+  category: motion-graphics
+  mood: playful, hyped, gamified
+  pace: fast
+  best_for: "Kid/teen-friendly how-tos, TikTok/Reels/Shorts tutorials framed as an in-game quest"
+
+visual_language:
+  color_palette:
+    primary: ["#3FB0FF", "#4CB848"]
+    accent: ["#FFD23F", "#E2452C", "#7DFF6A"]
+    background: "#9FDCFF"
+    text: "#FFFFFF"
+    muted: "#3A3A55"
+  composition: >
+    Vertical 9:16. Sky upper half with chunky square clouds, green studded ground lower half.
+    Persistent blocky avatar (original character, cube head) stands left on the ground line;
+    the step's object sits center-right. Quest HUD panel pinned top, outlined step title +
+    in-game chat caption box in the lower third.
+  texture: >
+    Faux-3D blocks (front face + darker right side + lighter top face), thick #1D1D1D outlines
+    (6px), flat fills, no gradients except sky. Never use a real game's logo, name, avatars,
+    fonts, or sounds; keep the look genre-inspired and original.
+
+typography:
+  headings:
+    font: "Lilita One"
+    weight: 400
+    tracking: "0em"
+  body:
+    font: "Fredoka"
+    weight: 700
+    line_height: 1.25
+  code:
+    font: "JetBrains Mono"
+    weight: 400
+  stat_card:
+    font: "Lilita One"
+    weight: 400
+    size_multiplier: 4.0
+  scale_system: "perfect_fourth"
+  weight_matrix:
+    title: 400
+    heading: 400
+    body: 700
+    caption: 700
+
+motion:
+  transitions: [cut, slide-left, pop]
+  animation_style: "back.out overshoot pops, bounce.out drops, steps() easing for pixel-y loops"
+  pacing_rules:
+    min_scene_hold_seconds: 2.5
+    max_scene_hold_seconds: 6
+    text_card_hold_seconds: 2.5
+    stat_card_hold_seconds: 2.0
+    transition_duration_seconds: 0.22
+  entrance: "objects drop in from above with bounce; titles pop (scale 0.6 -> 1) with overshoot"
+  exit: "slide-left + fade (0.22s)"
+
+audio:
+  voice_style: >
+    Hyped gamer narrator. Default: Piper en_US-ryan-high, length_scale 0.86, sentence_silence 0.12,
+    then pitch +2 semitones (rubberband pitch=1.12246), +3dB presence at 3kHz, loudnorm -16 LUFS.
+    Swap for the user's cloned/recorded voice when available.
+  music_mood: "original upbeat chiptune, ~132 BPM, C-Am-F-G, square lead + triangle bass + noise drums"
+  music_volume: 0.2
+  sfx_style: "synth pop on title entrances, coin ding on +XP, checkbox click on step complete, level-up arpeggio at finale"
+  ducking_threshold_db: -4
+
+asset_generation:
+  image_prompt_prefix: "blocky low-poly voxel game style, chunky cubes, thick black outlines, bright saturated colors, sky blue background, "
+  image_negative_prompt: "photorealistic, realistic textures, brand logos, trademarked characters, muted colors, dark gloomy"
+  diagram_style: "chunky outlined blocks, game UI panels with dark translucent fill and thick borders"
+  consistency_anchors:
+    - "Quest HUD on top with green XP bar and N/6 counter; LVL badge levels up at the finale"
+    - "Same original blocky chef avatar every scene, idle bob, points at each object"
+    - "+50 XP pop-up on every completed step; 'QUEST COMPLETE!' + achievement toast ending"
+    - "Captions shown as in-game chat lines: 'ChefBlox: ...'"
+
+overlays:
+  stat_card:
+    bg: "#2A1F4A"
+    border: "#FFD23F"
+    radius: 26
+    shadow: "0 10px 0 #1D1D1D"
+  key_term:
+    bg: "#7DFF6A"
+    text: "#1D1D1D"
+    radius: 14
+  code_block:
+    bg: "#14141F"
+    text: "#FFFFFF"
+    highlight: "#FFD23F"
+
+quality_rules:
+  - "All text has a thick dark outline or sits on a dark panel (readable over sky and grass)"
+  - "Every scene has at least one looping micro-animation (flames, bubbles, bob)"
+  - "A sound effect lands on every title pop and every XP gain"
+  - "No real game brand assets: no logos, official avatars, fonts, or signature sounds"
+  - "Text readable at 720p on mobile"
+
+chart_palette:
+  - "#3FB0FF"
+  - "#7DFF6A"
+  - "#FFD23F"
+  - "#E2452C"
+  - "#FF7AD9"
+  - "#2A1F4A"
+
+color_rules:
+  harmony_type: "triadic"
+  contrast_validation: true
+  colorblind_safe: false
