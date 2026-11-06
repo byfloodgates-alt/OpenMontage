@@ -10,6 +10,7 @@ The two recurring characters for the vertical promo style: **the host** (seated 
 
 ## Voices: `voice/`
 - `cast.json`: the host uses Kokoro `am_puck` and the bot `am_michael` (two of the voices Kokoro rates best). There is no pitch shifting or echo, only light cleanup; moods change the speaking speed.
+- To use ElevenLabs instead of the offline voices, set `"engine": "elevenlabs"` in `cast.json`. It needs an API key, either saved for `api.elevenlabs.io` (header `xi-api-key`) in the cloud environment's Network secrets or set as `ELEVENLABS_API_KEY`. Change the voices under each character's `elevenlabs.voice_id`.
 - `voices.py script.json out_dir` renders each line and writes `lines.json` and a `dialogue.wav` reel.
 - `timeline.py out_dir` builds per-frame lip-sync data.
 

@@ -1,7 +1,10 @@
 {
-  "_about": "Voice settings for the desk-duo cast. voices.py reads this. Kokoro voices graded best for natural male speech; no pitch shifting, light cleanup only. speed is Kokoro's speaking rate.",
+  "_about": "Voice settings for the desk-duo cast. voices.py reads this. engine: 'kokoro' (offline, default) or 'elevenlabs' (needs an API key for api.elevenlabs.io). Kokoro voices graded best for natural male speech; no pitch shifting, light cleanup only. speed is the speaking rate.",
+  "engine": "kokoro",
   "host": {
     "voice": "am_puck",
+    "elevenlabs": { "voice_id": "bIHbv24MWmeRgasZH58o", "_name": "Will (premade: young, relaxed, American)",
+                    "settings": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.35 } },
     "moods": {
       "calm":    { "speed": 1.02 },
       "excited": { "speed": 1.1 },
@@ -12,6 +15,8 @@
   "bot": {
     "voice": "am_michael",
     "alt_voice": "am_fenrir",
+    "elevenlabs": { "voice_id": "cjVigY5qzO86Huf0OWal", "_name": "Eric (premade: smooth, friendly, American)",
+                    "settings": { "stability": 0.5, "similarity_boost": 0.75, "style": 0.2 } },
     "moods": {
       "calm":    { "speed": 1.0 },
       "dry":     { "speed": 0.97 },

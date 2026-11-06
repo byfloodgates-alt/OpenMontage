@@ -19,6 +19,21 @@ def run(cmd):
     if r.returncode: sys.exit(f"failed: {' '.join(cmd[:3])}…\n{r.stderr[-1500:]}")
     return r.stdout
 
+def elevenlabs(text, ev, mood, dst):
+    """One line via the ElevenLabs API -> trimmed wav. Key: ELEVENLABS_API_KEY, or injected by the cloud network proxy."""
+    import urllib.request, urllib.error
+    body = {'text': text, 'model_id': ev.get('model', 'eleven_multilingual_v2'),
+            'voice_settings': {**ev.get('settings', {}), 'speed': mood.get('speed', 1.0)}}
+    req = urllib.request.Request(f"https://api.elevenlabs.io/v1/text-to-speech/{ev['voice_id']}?output_format=mp3_44100_128",
+                                 json.dumps(body).encode(), {'Content-Type': 'application/json',
+                                 'xi-api-key': os.environ.get('ELEVENLABS_API_KEY', 'set-by-proxy')})
+    try: mp3 = urllib.request.urlopen(req, timeout=60).read()
+    except urllib.error.HTTPError as e: sys.exit(f"ElevenLabs refused the request ({e.code}): {e.read()[:300]!r}")
+    except urllib.error.URLError as e: sys.exit(f"ElevenLabs is unreachable (no key saved for api.elevenlabs.io, or blocked network): {e.reason}")
+    open(dst + '.mp3', 'wb').write(mp3)
+    trim = 'silenceremove=start_periods=1:start_threshold=-50dB'
+    run(['ffmpeg', '-v', 'error', '-y', '-i', dst + '.mp3', '-af', f'{trim},areverse,{trim},areverse', '-ar', '24000', '-ac', '1', dst])
+
 def main():
     if len(sys.argv) < 3: print(__doc__); sys.exit(2)
     script, out = json.load(open(sys.argv[1])), sys.argv[2]
@@ -26,12 +41,15 @@ def main():
     os.makedirs(out, exist_ok=True)
     raw = tempfile.mkdtemp(prefix='tts_')
     tts_lines = []
+    eleven = cast.get('engine') == 'elevenlabs'
     for L in script:
         c = cast[L['who']]; m = c['moods'].get(L.get('mood', 'calm'), c['moods']['calm'])
-        tts_lines.append({'id': L['id'], 'text': L.get('say', L['text']), 'voice': L.get('voice', c['voice']),
-                          'speed': L.get('speed', m['speed'])})
-    json.dump(tts_lines, open(os.path.join(raw, 'in.json'), 'w'))
-    run([PY, '-I', os.path.join(LIB, 'core/tts/tts.py'), os.path.join(raw, 'in.json'), raw])
+        if eleven: elevenlabs(L.get('say', L['text']), c['elevenlabs'], m, os.path.join(raw, f"{L['id']}.wav"))
+        else: tts_lines.append({'id': L['id'], 'text': L.get('say', L['text']), 'voice': L.get('voice', c['voice']),
+                                'speed': L.get('speed', m['speed'])})
+    if tts_lines:
+        json.dump(tts_lines, open(os.path.join(raw, 'in.json'), 'w'))
+        run([PY, '-I', os.path.join(LIB, 'core/tts/tts.py'), os.path.join(raw, 'in.json'), raw])
     import numpy as np, soundfile as sf
     result, t = [], 0.0
     for i, L in enumerate(script):
