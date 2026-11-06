@@ -1,22 +1,22 @@
 {
-  "_about": "Voice settings for the desk-duo cast. voices.py reads this. pitch is in semitones (formants preserved); speed is Kokoro's speaking rate.",
+  "_about": "Voice settings for the desk-duo cast. voices.py reads this. Kokoro voices graded best for natural male speech; no pitch shifting, light cleanup only. speed is Kokoro's speaking rate.",
   "host": {
-    "voice": "am_liam",
+    "voice": "am_puck",
     "moods": {
-      "calm":    { "speed": 1.05, "pitch": 0 },
-      "excited": { "speed": 1.14, "pitch": 7 },
-      "flat":    { "speed": 0.98, "pitch": -1 }
+      "calm":    { "speed": 1.02 },
+      "excited": { "speed": 1.1 },
+      "flat":    { "speed": 0.98 }
     },
-    "fx": "highpass=f=80,equalizer=f=4500:width_type=o:width=1.5:g=-4,lowpass=f=9000,acompressor=threshold=-18dB:ratio=3:attack=5:release=80:makeup=2"
+    "fx": "highpass=f=70,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=1.5"
   },
   "bot": {
-    "voice": "am_adam",
-    "alt_voice": "bm_lewis",
+    "voice": "am_michael",
+    "alt_voice": "am_fenrir",
     "moods": {
-      "calm":    { "speed": 0.96, "pitch": -1 },
-      "dry":     { "speed": 0.92, "pitch": -2 },
-      "pleased": { "speed": 1.0,  "pitch": 0 }
+      "calm":    { "speed": 1.0 },
+      "dry":     { "speed": 0.97 },
+      "warm":    { "speed": 0.95 }
     },
-    "fx": "highpass=f=170,lowpass=f=4300,equalizer=f=1800:width_type=o:width=1:g=3,aecho=0.85:0.55:7:0.22,acompressor=threshold=-20dB:ratio=4:attack=3:release=60:makeup=3"
+    "fx": "highpass=f=90,lowpass=f=9000,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=1.5"
   }
 }

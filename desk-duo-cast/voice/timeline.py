@@ -8,10 +8,8 @@ and writes out_dir/timeline.json: per frame, each character's mouth opening (0..
 import sys, os, json, numpy as np, soundfile as sf
 out = sys.argv[1]; fps = int(sys.argv[2]) if len(sys.argv) > 2 else 30
 lines = json.load(open(os.path.join(out, 'lines.json')))
-t, placed = 0.0, []
-for i, L in enumerate(lines):
-    t += 0.15 if i and lines[i - 1]['who'] == L['who'] else 0.35
-    placed.append((t, L)); t += L['dur']
+placed = [(L['start'], L) for L in lines]
+t = lines[-1]['start'] + lines[-1]['dur']
 total = t + 0.8
 n = int(total * fps)
 frames = [{'host': 0.0, 'bot': 0.0, 'speaker': None, 'hostMood': 'calm', 'botMood': 'calm'} for _ in range(n)]

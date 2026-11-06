@@ -4,8 +4,9 @@
 
 script.json = [{"id": "01", "who": "host"|"bot", "text": "...", "mood": "calm"}, ...]
   optional per line: "voice" (override the cast voice), "speed", "pitch" (semitones)
-Writes out_dir/<id>.wav (48 kHz mono, effects applied), out_dir/lines.json (with durations)
-and out_dir/dialogue.wav (all lines in order with natural gaps), for a quick listen.
+Writes out_dir/<id>.wav (48 kHz mono, effects applied, level-matched), out_dir/lines.json (with durations and
+start times) and out_dir/dialogue.wav (all lines placed at their start times). Optional per line: 'pause' (extra seconds before it),
+'say' (spelling sent to the voice when it differs from the caption text, e.g. "Clawd" for Claude).
 Cast settings live in cast.json next to this file.
 """
 import sys, os, json, subprocess, tempfile
@@ -27,32 +28,38 @@ def main():
     tts_lines = []
     for L in script:
         c = cast[L['who']]; m = c['moods'].get(L.get('mood', 'calm'), c['moods']['calm'])
-        tts_lines.append({'id': L['id'], 'text': L['text'], 'voice': L.get('voice', c['voice']),
+        tts_lines.append({'id': L['id'], 'text': L.get('say', L['text']), 'voice': L.get('voice', c['voice']),
                           'speed': L.get('speed', m['speed'])})
     json.dump(tts_lines, open(os.path.join(raw, 'in.json'), 'w'))
     run([PY, '-I', os.path.join(LIB, 'core/tts/tts.py'), os.path.join(raw, 'in.json'), raw])
-    result = []
-    for L in script:
+    import numpy as np, soundfile as sf
+    result, t = [], 0.0
+    for i, L in enumerate(script):
         c = cast[L['who']]; m = c['moods'].get(L.get('mood', 'calm'), c['moods']['calm'])
-        semis = L.get('pitch', m['pitch'])
+        semis = L.get('pitch', m.get('pitch', 0))
         chain = []
         if semis: chain.append(f"rubberband=pitch={2 ** (semis / 12):.5f}:formant=preserved:pitchq=quality")
-        chain.append(c['fx'])
-        chain.append('loudnorm=I=-16:TP=-1.5:LRA=7')
+        if c.get('fx'): chain.append(c['fx'])
         dst = os.path.join(out, f"{L['id']}.wav")
-        run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(raw, f"{L['id']}.wav"), '-af', ','.join(chain), '-ar', '48000', '-ac', '1', dst])
-        dur = float(run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', dst]))
-        result.append({**L, 'file': f"{L['id']}.wav", 'dur': round(dur, 3)})
-        print(f"{L['id']:>6} {L['who']:4} {L.get('mood', 'calm'):8} {dur:5.2f}s  {L['text']}")
+        run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(raw, f"{L['id']}.wav"), *(['-af', ','.join(chain)] if chain else []),
+             '-ar', '48000', '-ac', '1', dst])
+        # level-match: voiced RMS to -20 dBFS, peaks below -1 dBFS (no dynamic loudness filter on short lines)
+        x, sr = sf.read(dst)
+        fr = x[: len(x) // 480 * 480].reshape(-1, 480); rms = np.sqrt((fr ** 2).mean(1))
+        voiced = rms[rms > rms.max() * 0.1]
+        g = 10 ** (-20 / 20) / (np.sqrt((voiced ** 2).mean()) + 1e-9)
+        x = x * min(g, 0.89 / (np.abs(x).max() + 1e-9))
+        sf.write(dst, x, sr, subtype='PCM_16')
+        dur = len(x) / sr
+        # timing: 0.3 s between speakers, 0.12 s when the same speaker continues, plus an optional "pause" before the line
+        t += (0.12 if i and script[i - 1]['who'] == L['who'] else 0.3) + L.get('pause', 0)
+        result.append({**L, 'file': f"{L['id']}.wav", 'dur': round(dur, 3), 'start': round(t, 3)}); t += dur
+        print(f"{L['id']:>6} {L['who']:4} {L.get('mood', 'calm'):8} {result[-1]['start']:6.2f}s +{dur:4.2f}s  {L['text']}")
     json.dump(result, open(os.path.join(out, 'lines.json'), 'w'), indent=1)
-    # quick-listen reel: 0.35 s between lines, 0.15 s when the same speaker continues
-    inputs, parts = [], []
-    for i, r in enumerate(result):
-        inputs += ['-i', os.path.join(out, r['file'])]
-        gap = 0.15 if i and result[i - 1]['who'] == r['who'] else 0.35
-        parts.append(f"[{i}]adelay={int(gap * 1000)}:all=1[a{i}]")
-    filt = ';'.join(parts) + ';' + ''.join(f"[a{i}]" for i in range(len(result))) + f"concat=n={len(result)}:v=0:a=1[o]"
-    run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', filt, '-map', '[o]', os.path.join(out, 'dialogue.wav')])
-    print('wrote', os.path.join(out, 'dialogue.wav'))
+    reel = np.zeros(int((t + 0.5) * 48000))
+    for r in result:
+        x, _ = sf.read(os.path.join(out, r['file'])); i0 = int(r['start'] * 48000); reel[i0:i0 + len(x)] += x
+    sf.write(os.path.join(out, 'dialogue.wav'), reel, 48000, subtype='PCM_16')
+    print('wrote', os.path.join(out, 'dialogue.wav'), f'({t:.2f}s of speech)')
 
 main()

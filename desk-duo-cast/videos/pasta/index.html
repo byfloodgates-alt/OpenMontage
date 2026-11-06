@@ -45,6 +45,8 @@ h1{font:600 38px Lora,serif;color:#fff;margin:12px 4px 12px;letter-spacing:-.01e
 #end .play{width:92px;height:64px;border-radius:18px;background:var(--coral);display:grid;place-items:center;margin-bottom:34px}
 #end h2{font:600 42px/1.2 Lora,serif;color:#fff;margin:0 0 30px}
 #end p{font:500 20px/1.4 Inter;color:#d8c9bf;border:1.5px solid #4a3a33;border-radius:16px;padding:14px 22px;margin:0}
+.chip{position:absolute;right:18px;top:16px;background:#2b2320;color:#fff;font:700 18px Inter;padding:10px 16px;border-radius:16px 16px 4px 16px;opacity:0}
+.heart{position:absolute;left:50%;top:286px;background:#fff;border:2px solid #f1b8a8;color:#d9533a;font:800 22px Inter;padding:10px 20px;border-radius:99px;opacity:0;white-space:nowrap}
 .stamp{position:absolute;font:800 46px Inter;color:#d9533a;border:6px solid #d9533a;border-radius:12px;padding:4px 18px;letter-spacing:.06em;opacity:0}
 </style></head><body>
 <canvas id="gl"></canvas>
@@ -56,6 +58,8 @@ h1{font:600 38px Lora,serif;color:#fff;margin:12px 4px 12px;letter-spacing:-.01e
   <div class="panel"><div class="chat">
     <div class="msg me" id="q"><div class="who" style="color:#b9aaa0">You</div><span id="qt"></span></div>
     <div class="msg cl" id="typing"><div class="who"><span style="color:var(--coral)">✳</span> Claude</div><div class="dots"><span></span><span></span><span></span></div></div>
+    <div class="msg cl" id="reply" style="display:none"><div class="who"><span style="color:var(--coral)">✳</span> Claude</div>you've eaten pasta like 400 times 🙃</div>
+    <div class="msg me" id="back"><div class="who" style="color:#b9aaa0">You</div>eating is my department</div>
   </div></div></div>
 
 <!-- 1..4: steps -->
@@ -73,35 +77,37 @@ h1{font:600 38px Lora,serif;color:#fff;margin:12px 4px 12px;letter-spacing:-.01e
         <g id="bub" fill="#d8f0fa" opacity="0"><circle cx="80" cy="0" r="5"/><circle cx="120" cy="0" r="4"/><circle cx="160" cy="0" r="6"/><circle cx="100" cy="0" r="3"/><circle cx="140" cy="0" r="4"/></g></g>
       <rect x="36" y="40" width="178" height="10" rx="5" fill="#4a4f57"/>
     </svg>
-    <div class="row" data-in="5.64" data-ck="8.6"><span class="ic">🍲</span>Big pot<span class="ck">✓</span></div>
-    <div class="row" data-in="7.3" data-ck="8.9"><span class="ic">💧</span>Water <small>4–5 litres</small><span class="ck">✓</span></div>
-    <div class="row" data-in="9.12" data-ck="10.0"><span class="ic">🧂</span>Salt <small>like the sea · ~1 tbsp/L</small><span class="ck">✓</span></div>
-    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+    <div class="row" data-key="pot"><span class="ic">🍲</span>Big pot<span class="ck">✓</span></div>
+    <div class="row" data-key="water"><span class="ic">💧</span>Water <small>4–5 litres</small><span class="ck">✓</span></div>
+    <div class="row" data-key="salt"><span class="ic">🧂</span>Salt <small>like the sea · ~1 tbsp/L</small><span class="ck">✓</span></div>
+    <div class="chip" id="which">which sea? 🤔</div>
+    <div class="meter"><span>Sass level</span><div class="bar"><i></i></div><b>0%</b></div>
   </div></div>
 
 <div class="card" id="c2"><div class="hdr"><span class="pill">STEP 2/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
   <h1>Cook the pasta</h1>
   <div class="panel">
     <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
-      <svg width="130" height="130" viewBox="0 0 130 130"><circle cx="65" cy="65" r="54" fill="#fff" stroke="#eadcd0" stroke-width="12"/>
+      <svg width="108" height="108" viewBox="0 0 130 130"><circle cx="65" cy="65" r="54" fill="#fff" stroke="#eadcd0" stroke-width="12"/>
         <circle id="ring" cx="65" cy="65" r="54" fill="none" stroke="var(--coral)" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 65 65)"/>
         <text id="clock" x="65" y="73" text-anchor="middle" font-family="Inter" font-weight="800" font-size="26" fill="#2a211d">10:00</text></svg>
       <div style="font:600 17px/1.45 Inter;color:var(--muted)">Al dente<br><span style="color:var(--ink);font:700 22px Inter">~10 minutes</span><br>check the packet</div>
     </div>
-    <div class="row" data-in="14.01" data-ck="14.3"><span class="ic">🍝</span>Pasta in<span class="ck">✓</span></div>
-    <div class="row" data-in="14.52" data-ck="14.8"><span class="ic">🥄</span>Stir <small>first minute</small><span class="ck">✓</span></div>
-    <div class="row" data-in="15.49" data-ck="15.9"><span class="ic">😋</span>Taste one<span class="ck">✓</span></div>
-    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+    <div class="row" data-key="anysea"><span class="ic">🌊</span>Salty like the sea <small>any sea</small><span class="ck">✓</span></div>
+    <div class="row" data-key="pastain"><span class="ic">🍝</span>Pasta in<span class="ck">✓</span></div>
+    <div class="row" data-key="stir"><span class="ic">🥄</span>Stir <small>first minute</small><span class="ck">✓</span></div>
+    <div class="row" data-key="taste"><span class="ic">😋</span>Taste one <small>don't guess</small><span class="ck">✓</span></div>
+    <div class="meter"><span>Sass level</span><div class="bar"><i></i></div><b>0%</b></div>
   </div></div>
 
 <div class="card" id="c3"><div class="hdr"><span class="pill">STEP 3/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
   <h1>The sauce</h1>
   <div class="panel">
-    <div class="row" data-in="19.08" data-ck="20.2"><span class="ic">🫙</span>Save 1 cup <small>pasta water</small><span class="ck">✓</span></div>
-    <div class="row" data-in="20.8" data-ck="21.1"><span class="ic">🧈</span>Butter<span class="ck">✓</span></div>
-    <div class="row" data-in="21.1" data-ck="21.5"><span class="ic">🧀</span>Parmesan <small>a lot</small><span class="ck">✓</span></div>
-    <div class="row" data-in="21.6" data-ck="22.5"><span class="ic">🍳</span>Toss it all in the pan<span class="ck">✓</span></div>
-    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+    <div class="row" data-key="cup"><span class="ic">🫙</span>Save 1 cup <small>pasta water</small><span class="ck">✓</span></div>
+    <div class="row" data-key="butter"><span class="ic">🧈</span>Butter<span class="ck">✓</span></div>
+    <div class="row" data-key="parm"><span class="ic">🧀</span>Parmesan <small>a lot</small><span class="ck">✓</span></div>
+    <div class="row" data-key="toss"><span class="ic">🍳</span>Toss it all in the pan<span class="ck">✓</span></div>
+    <div class="meter"><span>Sass level</span><div class="bar"><i></i></div><b>0%</b></div>
   </div></div>
 
 <div class="card" id="c4"><div class="hdr"><span class="pill">STEP 4/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
@@ -115,14 +121,15 @@ h1{font:600 38px Lora,serif;color:#fff;margin:12px 4px 12px;letter-spacing:-.01e
       <g fill="#f3e3a0"><circle cx="128" cy="92" r="4"/><circle cx="160" cy="84" r="3"/><circle cx="172" cy="104" r="4"/><circle cx="140" cy="110" r="3"/></g>
       <g fill="#4e9b4a"><ellipse cx="150" cy="78" rx="9" ry="5" transform="rotate(-25 150 78)"/><ellipse cx="160" cy="80" rx="9" ry="5" transform="rotate(25 160 80)"/></g>
     </svg>
-    <div class="row" data-in="23.4" style="justify-content:center;font:700 22px Inter"><span class="ic">👨‍🍳</span>Chef status<small id="cs">checking…</small></div>
-    <div class="stamp" id="stamp" style="left:50%;top:70px">NOT YET</div>
-    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+    <div class="row" data-key="chef" style="justify-content:center;font:700 22px Inter"><span class="ic">👨‍🍳</span>Chef status<small id="cs">checking…</small></div>
+    <div class="stamp" id="stamp" style="left:50%;top:70px">IN TRAINING</div>
+    <div class="heart" id="heart">❤ proud of you</div>
+    <div class="meter"><span>Sass level</span><div class="bar"><i></i></div><b>0%</b></div>
   </div></div>
 
 <div id="cap"></div>
 <div id="end"><div class="play"><svg width="30" height="30" viewBox="0 0 30 30"><path d="M8 4 L26 15 L8 26 Z" fill="#fff"/></svg></div>
-  <h2>What should Claude roast you about next?</h2>
+  <h2>What should Claude teach you next?</h2>
   <p>Send this to the friend who burns water</p></div>
 
 <script type="module">
@@ -131,7 +138,8 @@ import { createHost, createBot, addWarmLights } from '/characters/characters.js'
 const W = 720, H = 1280, DPR = window.devicePixelRatio || 1;
 const tl = await (await fetch('voice/out/timeline.json')).json();
 const cap = await (await fetch('voice/out/captions.json')).json();
-const TOTAL = 30.6, FPS = 30;
+const cues = await (await fetch('voice/out/cues.json')).json();
+const TOTAL = cues.total, FPS = 30, EV = cues.ev;
 await document.fonts.ready;
 
 // ---------- 3D room (same set as the cast kit's test scene)
@@ -175,14 +183,10 @@ const back = (x) => { const c = 1.7; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1
 const smooth = (x) => x * x * (3 - 2 * x);
 const $ = (q, r = document) => r.querySelector(q);
 const inWin = (t, a, z) => t >= a && t < z;
-// acting overrides by time: host reactions to the roasts
-const hostReact = [[3.6, 5.0, { brows: -0.6, browTilt: 1 }], [10.3, 12.3, { brows: -1, smile: -0.4 }], [16.2, 17.6, { brows: 0.6, look: [0.5, 0.5] }], [25.2, 28.4, { brows: -0.8, headNod: 0.12, smile: -0.5 }]];
-const botMood = { dry: 'squint', pleased: 'happy', calm: 'neutral' };
-
-// card windows: [id, start, end]
-const CARDS = [['c0', 0.0, 2.15], ['c1', 2.15, 12.3], ['c2', 12.3, 17.75], ['c3', 17.75, 23.15], ['c4', 23.15, 28.6]];
-// sarcasm meter values over time
-const SASS = [[0, 0], [3.0, 38], [4.7, 52], [10.5, 81], [16.6, 88], [26.2, 100]];
+// acting: reactions come from cues.json; the robot teases with a smile, never a squint
+const hostReact = cues.react.host, botReact = cues.react.bot;
+const botMood = { dry: 'neutral', calm: 'neutral', warm: 'happy' };
+const CARDS = cues.cards, SASS = cues.sass;
 // each keyframe ramps from the previous value over 0.6 s
 const sassAt = (t) => { let v = 0; for (let i = 1; i < SASS.length; i++) { const [ti, vi] = SASS[i]; v = t < ti ? v : SASS[i - 1][1] + (vi - SASS[i - 1][1]) * smooth(clamp((t - ti) / 0.6)); if (t < ti) break; } return Math.round(v); };
 
@@ -203,7 +207,7 @@ window.frame = (i) => {
       sg.firstElementChild.style.width = (j + 1 < n ? 100 : cur ? 100 * smooth(clamp((t - a) / (z - a))) : 0) + '%';
     });
     el.querySelectorAll('.row').forEach((r) => {
-      const ti = +r.dataset.in, tc = r.dataset.ck ? +r.dataset.ck : null;
+      const [ti, tc] = cues.rows[r.dataset.key];
       const p = back(k(t, ti, 0.35));
       r.style.opacity = clamp(p * 1.4); r.style.transform = `translateX(${(1 - p) * 40}px)`;
       const ck = r.querySelector('.ck'); if (ck && tc != null) ck.classList.toggle('done', t >= tc);
@@ -211,32 +215,36 @@ window.frame = (i) => {
     });
     const m = el.querySelector('.meter'); if (m) { const v = sassAt(t); m.querySelector('i').style.width = v + '%'; m.querySelector('b').textContent = v + '%'; }
   });
-  // question card: typing then Claude dots
-  const q = 'how do I make pasta?'; const nq = Math.floor(clamp((t - 0.55) / 0.9) * q.length);
-  $('#q').style.opacity = clamp((t - 0.35) / 0.2); $('#qt').textContent = q.slice(0, nq) + (nq < q.length && t > 0.35 ? '|' : '');
-  $('#typing').style.opacity = clamp((t - 1.6) / 0.2);
+  // chat card: question types out, Claude 'typing', reply, comeback
+  const q = 'how do I make pasta?'; const nq = Math.floor(clamp((t - EV.q0) / (EV.q1 - EV.q0)) * q.length);
+  $('#q').style.opacity = clamp((t - EV.q0 + 0.1) / 0.2); $('#qt').textContent = q.slice(0, nq) + (nq < q.length && t > EV.q0 ? '|' : '');
+  $('#typing').style.display = t < EV.reply ? '' : 'none'; $('#typing').style.opacity = clamp((t - EV.q1 - 0.1) / 0.2);
+  $('#reply').style.display = t >= EV.reply ? '' : 'none'; const rp = back(k(t, EV.reply, 0.3)); $('#reply').style.opacity = clamp(rp * 1.5); $('#reply').style.transform = `translateY(${(1 - rp) * 14}px)`;
+  const bp = back(k(t, EV.comeback, 0.3)); $('#back').style.opacity = clamp(bp * 1.5); $('#back').style.transform = `translateY(${(1 - bp) * 14}px)`;
   document.querySelectorAll('.dots span').forEach((d, j) => d.style.transform = `translateY(${-4 * Math.max(0, Math.sin(t * 9 - j * 0.9))}px)`);
-  // pot: water fills 7.3..9, boils from 9.5
-  const wl = smooth(clamp((t - 7.3) / 1.6)); $('#water').setAttribute('y', 130 - wl * 62);
-  const boil = clamp((t - 9.5) / 0.6);
+  // pot: fills while he says "big pot of water", boils from "salt it"
+  const wl = smooth(clamp((t - EV.fill[0]) / (EV.fill[1] - EV.fill[0]))); $('#water').setAttribute('y', 130 - wl * 62);
+  const boil = clamp((t - EV.boil) / 0.6);
   $('#bub').setAttribute('opacity', boil); $('#steam').setAttribute('opacity', boil * (0.6 + 0.4 * Math.sin(t * 3)));
   [...$('#bub').children].forEach((c, j) => { const ph = (t * 1.3 + j * 0.37) % 1; c.setAttribute('cy', 128 - ph * 60 * wl); c.setAttribute('r', 2 + 4 * Math.sin(ph * Math.PI)); });
   [...$('#steam').children].forEach((p, j) => p.setAttribute('transform', `translate(0 ${-((t * 18 + j * 9) % 14)})`));
-  // timer: 10:00 -> 0:00 between 14.8 and 16.0 (sped up)
-  const tp = smooth(clamp((t - 14.8) / 1.2)); $('#ring').setAttribute('stroke-dashoffset', 339.3 * (1 - tp));
+  const wp = back(k(t, EV.whichsea, 0.3)); $('#which').style.opacity = clamp(wp * 1.5); $('#which').style.transform = `scale(${0.7 + 0.3 * wp})`;
+  // timer: 10:00 -> 0:00 while "about ten minutes" is said (sped up)
+  const tp = smooth(clamp((t - EV.timer[0]) / (EV.timer[1] - EV.timer[0]))); $('#ring').setAttribute('stroke-dashoffset', 339.3 * (1 - tp));
   const secs = Math.round(600 * (1 - tp)); $('#clock').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
-  // chef verdict
-  $('#cs').textContent = t < 26.37 ? 'checking…' : 'pending review';
-  const sp = back(k(t, 26.4, 0.3)); const st = $('#stamp');
-  st.style.opacity = t >= 26.4 ? clamp(sp * 2) : 0; st.style.transform = `translate(-50%,0) rotate(-12deg) scale(${2.2 - 1.2 * sp})`;
+  // chef verdict: stamped "in training", then the heart
+  $('#cs').textContent = t < EV.stamp ? 'checking…' : 'in training';
+  const sp = back(k(t, EV.stamp, 0.3)); const st = $('#stamp');
+  st.style.opacity = t >= EV.stamp ? clamp(sp * 2) : 0; st.style.transform = `translate(-50%,0) rotate(-12deg) scale(${2.2 - 1.2 * sp})`;
+  const hp = back(k(t, EV.heart, 0.35)); $('#heart').style.opacity = clamp(hp * 1.5); $('#heart').style.transform = `translate(-50%,0) scale(${0.6 + 0.4 * hp})`;
   // ---- captions: current phrase, pops in
-  const ph = cap.phrases.find((p) => t >= p.t0 - 0.05 && t < Math.max(p.t1 + 0.15, p.t0 + 0.5) && t < 28.6);
+  const ph = cap.phrases.find((p) => t >= p.t0 - 0.05 && t < Math.max(p.t1 + 0.15, p.t0 + 0.5) && t < cues.end);
   const ce = $('#cap');
   if (ph) { if (ce.dataset.k !== ph.t0 + '') { ce.dataset.k = ph.t0 + ''; ce.innerHTML = `<span>${ph.text}</span>`; }
     const pp = back(k(t, ph.t0 - 0.05, 0.18)); ce.firstChild.style.transform = `scale(${0.85 + 0.15 * pp})`; ce.style.opacity = 1; }
   else ce.style.opacity = 0;
   // ---- end card
-  const e = smooth(k(t, 28.6, 0.45)); $('#end').style.opacity = e;
+  const e = smooth(k(t, cues.end, 0.45)); $('#end').style.opacity = e;
   $('#end').style.transform = `scale(${1.04 - 0.04 * e})`;
   // ---- characters
   const f = tl.frames[Math.min(i, tl.frames.length - 1)] || {};
@@ -249,9 +257,10 @@ window.frame = (i) => {
     armL: { raise: 0.2, bend: 1.25 },
     armR: ex ? { raise: 0.9 + Math.sin(t * 6) * 0.15, bend: 1.7, out: 0.25 } : { raise: 0.2, bend: 1.25 } };
   for (const [a, z, o] of hostReact) if (inWin(t, a, z)) hs = { ...hs, ...o };
+  let bm = botMood[f.botMood] || 'neutral'; for (const [a, z, m] of botReact) if (inWin(t, a, z)) bm = m;
   h.update(hs);
   b.update({ t, talk: speaking === 'bot' ? f.bot : 0, blink: blinkB, headTurn: speaking === 'bot' ? -0.05 : 0.08, look: [-0.5, -0.1],
-    mood: t > 26.4 && t < 28.6 ? 'happy' : (botMood[f.botMood] || 'neutral'), headTilt: speaking === 'bot' ? Math.sin(t * 3) * 0.03 : 0 });
+    mood: bm, headTilt: speaking === 'bot' ? Math.sin(t * 3) * 0.03 : 0 });
   renderer.render(s, cam);
 };
 window.__done = true;

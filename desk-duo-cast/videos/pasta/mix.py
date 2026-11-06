@@ -1,6 +1,7 @@
 """Mix: dialogue + procedural mandolin tarantella bed (ducked under speech) + UI sounds. -> out/mix.wav (48 kHz stereo)"""
 import json, numpy as np, soundfile as sf
-SR, TOTAL = 48000, 30.6
+CUES = json.load(open('voice/out/cues.json')); EV = CUES['ev']
+SR, TOTAL, END = 48000, CUES['total'], CUES['end']
 rng = np.random.default_rng(7)
 N = int(SR * TOTAL)
 dlg, sr = sf.read('voice/out/dialogue.wav'); assert sr == SR
@@ -26,10 +27,10 @@ prog = ['Am', 'Am', 'Dm', 'Dm', 'E', 'E', 'Am', 'Am', 'C', 'C', 'Dm', 'E']
 music = np.zeros(N + SR * 2)
 t = 0.4; bar = 0
 cache = {}
-while t < 28.4:
+while t < END - 0.2:
     ch = chords[prog[bar % len(prog)]]
     for j, m in enumerate(ch):
-        if t >= 28.4: break
+        if t >= END - 0.2: break
         key = m
         if key not in cache: cache[key] = pluck(note(m), 0.9)
         x = cache[key] * (0.9 if j == 0 else 0.6) * (1 + 0.08 * rng.standard_normal())
@@ -43,7 +44,7 @@ while t < 28.4:
     bar += 1
 # final chord at the end card
 for m in [45, 57, 60, 64, 69]:
-    x = pluck(note(m), 2.0) * 0.8; i0 = int(28.6 * SR); music[i0:i0 + len(x)] += x
+    x = pluck(note(m), 2.0) * 0.8; i0 = int(END * SR); music[i0:i0 + len(x)] += x
 music = music[:N]
 music /= np.abs(music).max() + 1e-9
 
@@ -56,7 +57,7 @@ duck = 1 - 0.65 * np.clip(env * 3, 0, 1)
 music *= 0.16 * duck
 # fade in, louder on the end card
 tt = np.arange(N) / SR
-music *= np.clip(tt / 0.6, 0, 1) * np.where(tt > 28.6, 1.9, 1.0)
+music *= np.clip(tt / 0.6, 0, 1) * np.where(tt > END, 1.9, 1.0)
 
 # ---------- UI sounds
 sfx = np.zeros(N)
@@ -75,12 +76,15 @@ def whoosh(d=0.35):
 def thump():
     n = int(0.25 * SR); tt = np.arange(n) / SR
     return np.sin(2 * np.pi * (70 + 80 * np.exp(-tt * 30)) * tt) * np.exp(-tt * 14) + 0.3 * rng.standard_normal(n) * np.exp(-tt * 60)
-for t in [2.15, 12.3, 17.75, 23.15]: put(whoosh(), t - 0.12, 0.35)
-for t in [5.64, 7.3, 9.12, 14.01, 14.52, 15.49, 19.08, 20.8, 21.1, 21.6, 23.4]: put(pop(), t, 0.22)
-for t in [8.6, 8.9, 10.0, 14.3, 14.8, 15.9, 20.2, 21.1, 21.5, 22.5]: put(tick(), t, 0.16)
-for j in range(14): put(tick(2600 + 300 * (j % 3)), 0.55 + j * 0.065, 0.07)   # typing
-put(thump(), 26.45, 0.55)                                                    # NOT YET stamp
-put(whoosh(0.5), 28.45, 0.3)
+for _, a, _z in CUES['cards'][1:]: put(whoosh(), a - 0.12, 0.35)
+for a, c in CUES['rows'].values(): put(pop(), a, 0.22)
+for t in [EV['reply'], EV['comeback'], EV['whichsea']]: put(pop(700), t, 0.2)
+for a, c in CUES['rows'].values():
+    if c is not None: put(tick(), c, 0.16)
+for j in range(int((EV['q1'] - EV['q0']) / 0.09)): put(tick(2600 + 300 * (j % 3)), EV['q0'] + j * 0.09, 0.07)   # typing
+put(thump(), EV['stamp'] + 0.05, 0.5)                                         # IN TRAINING stamp
+for j, f in enumerate([880, 1109, 1319]): put(pop(f, 0.35), EV['heart'] + 0.08 * j, 0.14)   # heart chime
+put(whoosh(0.5), END - 0.15, 0.3)
 
 mix = voice * 1.0 + music + sfx
 mix = np.stack([mix + 0.02 * np.roll(music, 300), mix + 0.02 * np.roll(music, -300)], 1)

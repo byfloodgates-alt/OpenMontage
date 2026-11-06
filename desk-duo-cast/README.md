@@ -9,7 +9,7 @@ The two recurring characters for the vertical promo style: **the host** (seated 
 - `addWarmLights(THREE, scene)`: the shared warm room lighting.
 
 ## Voices: `voice/`
-- `cast.json`: the host uses Kokoro `am_liam` with moods `calm`, `excited` (+7 semitones, faster) and `flat`. The bot uses `am_adam` (alternative `bm_lewis`) with moods `calm`, `dry` and `pleased`, and a small-speaker effect (band-limited, slight metallic echo).
+- `cast.json`: the host uses Kokoro `am_puck` and the bot `am_michael` (two of the voices Kokoro rates best). There is no pitch shifting or echo, only light cleanup; moods change the speaking speed.
 - `voices.py script.json out_dir` renders each line and writes `lines.json` and a `dialogue.wav` reel.
 - `timeline.py out_dir` builds per-frame lip-sync data.
 
