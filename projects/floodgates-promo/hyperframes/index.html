@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<title>Floodgates: AI Video Studio</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+  @font-face { font-family: "Inter Display"; font-weight: 900; src: url("assets/fonts/InterDisplay-Black.otf") format("opentype"); }
+  @font-face { font-family: "Inter Display"; font-weight: 700; src: url("assets/fonts/InterDisplay-Bold.otf") format("opentype"); }
+  @font-face { font-family: "Inter"; font-weight: 500; src: url("assets/fonts/Inter-Medium.otf") format("opentype"); }
+  @font-face { font-family: "Inter"; font-weight: 600; src: url("assets/fonts/Inter-SemiBold.otf") format("opentype"); }
+  :root { --bg:#05070d; --deep:#0b1020; --cyan:#22d3ee; --violet:#8b5cf6; --white:#f5f7ff; --muted:#8a93b2;
+          --grad: linear-gradient(90deg,#22d3ee,#8b5cf6); }
+  body { margin:0; background:var(--bg); color:var(--white); font-family:"Inter",sans-serif; }
+  #root { position:relative; width:1080px; height:1920px; overflow:hidden; }
+  .full { position:absolute; inset:0; width:1080px; height:1920px; }
+  .bgfill { position:absolute; inset:0; width:1080px; height:1920px;
+    background: radial-gradient(ellipse 70% 45% at 50% 42%, #142046 0%, #070a14 60%, #05070d 100%); }
+  .grid { position:absolute; inset:0; width:1080px; height:1920px; opacity:0.18;
+    background-image: linear-gradient(rgba(138,147,178,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(138,147,178,0.35) 1px, transparent 1px);
+    background-size: 90px 90px; }
+  .wave { position:absolute; left:-540px; display:block; width:2160px; height:520px; border-radius:50%; }
+  #wv0 { top:1620px; background: radial-gradient(ellipse at 50% 0%, rgba(34,211,238,0.35), transparent 60%); }
+  #wv1 { top:1700px; background: radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.35), transparent 60%); }
+  #glow { position:absolute; left:140px; top:520px; display:block; width:800px; height:800px; border-radius:50%;
+    background: radial-gradient(circle, rgba(34,211,238,0.55), rgba(139,92,246,0.35) 40%, transparent 70%); }
+  .brandbar { position:absolute; top:90px; left:0; right:0; display:flex; justify-content:center; align-items:center; gap:18px; }
+  .mark { position:relative; display:block; width:56px; height:56px; }
+  .mark i { position:absolute; top:4px; display:block; width:14px; height:48px; border-radius:7px; background:var(--white); }
+  .mark i:nth-child(1) { left:4px; } .mark i:nth-child(2) { right:4px; }
+  .mark b { position:absolute; left:20px; top:14px; display:block; width:16px; height:28px; border-radius:8px; background:var(--grad); }
+  .bname { display:block; font-family:"Inter Display"; font-weight:900; font-size:34px; letter-spacing:0.28em; }
+  .bsub { display:block; font-weight:600; font-size:24px; letter-spacing:0.2em; color:var(--muted); }
+  .cap { position:absolute; left:80px; right:80px; top:1640px; height:160px; display:flex; justify-content:center; align-items:flex-start; text-align:center; }
+  .cap span { display:block; font-weight:500; font-size:40px; line-height:1.35; color:rgba(245,247,255,0.82); max-width:900px; }
+  .scene { position:absolute; inset:0; width:1080px; height:1920px; }
+  .wrap { position:absolute; inset:0; width:1080px; height:1920px; }
+  /* S0 gates */
+  .gate { position:absolute; top:0; display:block; width:540px; height:1920px; box-sizing:border-box;
+    background: repeating-linear-gradient(90deg, #0c1222 0 88px, #101830 88px 90px); }
+  #gateL { left:0; border-right:4px solid #22d3ee; box-shadow: 30px 0 80px rgba(34,211,238,0.35); }
+  #gateR { left:540px; border-left:4px solid #8b5cf6; box-shadow: -30px 0 80px rgba(139,92,246,0.35); }
+  #seam { position:absolute; left:530px; top:0; display:block; width:20px; height:1920px; background:linear-gradient(#22d3ee,#8b5cf6); filter: blur(6px); }
+  #flood { position:absolute; left:0; top:0; display:block; width:1080px; height:1920px;
+    background: radial-gradient(ellipse 45% 60% at 50% 45%, rgba(170,240,255,0.9), rgba(34,211,238,0.45) 30%, rgba(139,92,246,0.25) 55%, transparent 75%); }
+  .kicker { position:absolute; left:0; right:0; top:820px; display:block; text-align:center; font-family:"Inter Display"; font-weight:700;
+    font-size:64px; letter-spacing:0.3em; color:var(--white); }
+  .hero { position:absolute; left:60px; right:60px; top:620px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .h1 { display:block; font-family:"Inter Display"; font-weight:900; font-size:108px; line-height:0.98; letter-spacing:-0.03em; }
+  .gtxt { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { display:block; margin-top:34px; font-weight:600; font-size:46px; color:var(--muted); }
+  /* S1 wordmark */
+  .wm { position:absolute; left:0; right:0; top:760px; display:flex; justify-content:center; }
+  .lt { display:block; font-family:"Inter Display"; font-weight:900; font-size:124px; letter-spacing:0.02em; }
+  #wline { position:absolute; left:140px; top:960px; display:block; width:800px; height:8px; border-radius:4px; background:var(--grad); }
+  .pill { display:block; font-weight:600; font-size:40px; letter-spacing:0.22em; padding:16px 36px; border-radius:999px;
+    border:2px solid rgba(34,211,238,0.6); background:rgba(34,211,238,0.08); color:var(--white); }
+  #s1-pillrow { position:absolute; left:0; right:0; top:1030px; display:flex; justify-content:center; }
+  #s1-for { position:absolute; left:0; right:0; top:1170px; display:block; text-align:center; font-weight:600; font-size:52px; color:var(--muted); }
+  #s1-for b { color:var(--white); font-weight:600; }
+  /* S2 waterfall */
+  #s2-head { position:absolute; left:40px; right:40px; top:250px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .h2 { display:block; font-family:"Inter Display"; font-weight:900; font-size:112px; line-height:0.95; letter-spacing:-0.03em; }
+  #falls { position:absolute; left:0; top:540px; display:block; width:1080px; height:1040px; overflow:hidden;
+    -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 85%, transparent); mask-image: linear-gradient(transparent, #000 12%, #000 85%, transparent); }
+  .col { position:absolute; top:-1960px; display:flex; flex-direction:column; gap:30px; width:300px; }
+  .vcard { position:relative; display:block; width:300px; height:460px; border-radius:30px; overflow:hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .vplay { position:absolute; left:110px; top:160px; display:block; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.25); border:3px solid rgba(255,255,255,0.8); }
+  .tri { position:absolute; left:30px; top:22px; width:0; height:0; border-left:28px solid #fff; border-top:18px solid transparent; border-bottom:18px solid transparent; }
+  .vlab { position:absolute; left:24px; bottom:58px; display:block; font-family:"Inter Display"; font-weight:900; font-size:34px; letter-spacing:0.04em; }
+  .vbar { position:absolute; left:24px; right:24px; bottom:30px; display:block; height:8px; border-radius:4px; background:rgba(255,255,255,0.3); }
+  .vbar span { display:block; height:8px; border-radius:4px; background:#fff; }
+  /* S3 audience */
+  #s3-head { position:absolute; left:60px; right:60px; top:280px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  #orb { position:absolute; left:390px; top:800px; display:block; width:300px; height:300px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #a5f3fc, #22d3ee 35%, #6d28d9 80%); box-shadow: 0 0 120px rgba(34,211,238,0.6); }
+  #orbmark { position:absolute; left:490px; top:895px; display:block; width:100px; height:110px; }
+  #orbmark i { position:absolute; top:0; display:block; width:26px; height:110px; border-radius:13px; background:#fff; }
+  #orbmark i:nth-child(1) { left:0; } #orbmark i:nth-child(2) { right:0; }
+  #orbmark b { position:absolute; left:36px; top:30px; display:block; width:28px; height:50px; border-radius:14px; background:#0b1020; }
+  .chip { position:absolute; display:block; font-weight:600; font-size:42px; padding:20px 34px; border-radius:999px;
+    background:rgba(15,22,45,0.85); border:2px solid rgba(139,92,246,0.7); box-shadow: 0 0 40px rgba(139,92,246,0.3); white-space:nowrap; }
+  /* S4 trusted */
+  #s4-label { position:absolute; left:0; right:0; top:420px; display:block; text-align:center; font-weight:600; font-size:44px; letter-spacing:0.34em; color:var(--cyan); }
+  .client { position:absolute; left:110px; right:110px; display:flex; align-items:center; gap:40px; height:250px; padding:0 46px; box-sizing:border-box;
+    border-radius:40px; background:rgba(16,24,48,0.75); border:2px solid rgba(255,255,255,0.12); box-shadow: 0 30px 80px rgba(0,0,0,0.45); }
+  #cl0 { top:600px; } #cl1 { top:900px; }
+  .ini { display:flex; justify-content:center; align-items:center; flex:0 0 150px; width:150px; height:150px; border-radius:50%;
+    font-family:"Inter Display"; font-weight:900; font-size:60px; color:#05070d; }
+  #cl0 .ini { background:linear-gradient(135deg,#22d3ee,#6366f1); } #cl1 .ini { background:linear-gradient(135deg,#a78bfa,#ec4899); }
+  .cname { display:block; font-family:"Inter Display"; font-weight:900; font-size:66px; letter-spacing:-0.02em; }
+  .crole { display:block; margin-top:8px; font-weight:600; font-size:34px; color:var(--muted); }
+  .crole b { color:var(--cyan); font-weight:600; }
+  #s4-more { position:absolute; left:0; right:0; top:1230px; display:block; text-align:center; font-weight:600; font-size:44px; color:var(--muted); }
+  /* S5 CTA */
+  #s5-head { position:absolute; left:60px; right:60px; top:420px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .h3 { display:block; font-family:"Inter Display"; font-weight:900; font-size:150px; line-height:0.92; letter-spacing:-0.035em; }
+  #profile { position:absolute; left:110px; right:110px; top:920px; height:240px; display:flex; align-items:center; gap:36px; padding:0 40px; box-sizing:border-box;
+    border-radius:40px; background:rgba(16,24,48,0.85); border:2px solid rgba(34,211,238,0.45); }
+  .pav { position:relative; display:block; flex:0 0 150px; width:150px; height:150px; border-radius:50%; background:var(--grad); }
+  .pav .m { position:absolute; left:42px; top:38px; display:block; width:66px; height:74px; }
+  .pav .m i { position:absolute; top:0; display:block; width:18px; height:74px; border-radius:9px; background:#fff; }
+  .pav .m i:nth-child(1) { left:0; } .pav .m i:nth-child(2) { right:0; }
+  .pav .m b { position:absolute; left:24px; top:20px; display:block; width:18px; height:34px; border-radius:9px; background:#0b1020; }
+  .ptext { display:flex; flex-direction:column; flex:1 1 auto; }
+  .handle { display:block; font-family:"Inter Display"; font-weight:900; font-size:56px; }
+  .pdesc { display:block; margin-top:6px; font-weight:600; font-size:30px; color:var(--muted); }
+  #follow { display:block; font-family:"Inter Display"; font-weight:700; font-size:40px; padding:22px 36px; border-radius:22px; background:var(--grad); color:#05070d; }
+  #dm { position:absolute; left:0; right:0; top:1240px; display:flex; justify-content:center; }
+  #dm span { display:block; font-weight:600; font-size:48px; padding:22px 48px; border-radius:999px; border:2px solid rgba(245,247,255,0.35); }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-width="1080" data-height="1920" data-duration="30">
+  <div id="bg" class="clip full" data-start="0" data-duration="30" data-track-index="0">
+    <div class="bgfill"></div><div class="grid" id="grid"></div>
+    <span id="glow"></span>
+    <span class="wave" id="wv0"></span><span class="wave" id="wv1"></span>
+  </div>
+
+  <!-- S0 gates -->
+  <section id="s0" class="clip scene" data-start="0" data-duration="4.2" data-track-index="1">
+    <div class="wrap" id="s0-wrap">
+      <span id="flood"></span>
+      <div class="hero" id="s0-hero">
+        <span class="h1" id="s0-l1">YOUR CONTENT</span>
+        <span class="h1" id="s0-l2">DESERVES <span class="gtxt">MORE.</span></span>
+        <span class="sub" id="s0-sub">More than average visuals.</span>
+      </div>
+      <span class="gate" id="gateL"></span><span class="gate" id="gateR"></span>
+      <span id="seam"></span>
+      <span class="kicker" id="kicker">AI CREATORS,</span>
+    </div>
+  </section>
+
+  <!-- S1 wordmark -->
+  <section id="s1" class="clip scene" data-start="4.2" data-duration="5" data-track-index="1">
+    <div class="wrap" id="s1-wrap">
+      <div class="wm" id="wm"><span class="lt" id="lt0">F</span><span class="lt" id="lt1">L</span><span class="lt" id="lt2">O</span><span class="lt" id="lt3">O</span><span class="lt" id="lt4">D</span><span class="lt" id="lt5">G</span><span class="lt" id="lt6">A</span><span class="lt" id="lt7">T</span><span class="lt" id="lt8">E</span><span class="lt" id="lt9">S</span></div>
+      <span id="wline"></span>
+      <div id="s1-pillrow"><span class="pill" id="s1-pill">AI VIDEO STUDIO</span></div>
+      <span id="s1-for">built for <b>AI content creators</b></span>
+    </div>
+  </section>
+
+  <!-- S2 waterfall -->
+  <section id="s2" class="clip scene" data-start="9.2" data-duration="5.4" data-track-index="1">
+    <div class="wrap" id="s2-wrap">
+      <div id="falls"><div class="col" id="col0" style="left:60px"><div class="vcard" style="background:linear-gradient(160deg,#22d3ee,#6366f1)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">REELS</div><div class="vbar"><span style="width:30%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">EXPLAINERS</div><div class="vbar"><span style="width:47%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#0ea5e9,#22d3ee 50%,#a78bfa)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">ADS</div><div class="vbar"><span style="width:64%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#6366f1,#0f172a)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">AVATARS</div><div class="vbar"><span style="width:81%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#f472b6,#8b5cf6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">PRODUCT DEMOS</div><div class="vbar"><span style="width:38%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#14b8a6,#3b82f6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">SHORTS</div><div class="vbar"><span style="width:55%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#22d3ee,#6366f1)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">LAUNCHES</div><div class="vbar"><span style="width:72%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">TUTORIALS</div><div class="vbar"><span style="width:89%"></span></div></div></div><div class="col" id="col1" style="left:390px"><div class="vcard" style="background:linear-gradient(160deg,#6366f1,#0f172a)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">AVATARS</div><div class="vbar"><span style="width:81%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#f472b6,#8b5cf6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">PRODUCT DEMOS</div><div class="vbar"><span style="width:38%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#14b8a6,#3b82f6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">SHORTS</div><div class="vbar"><span style="width:55%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#22d3ee,#6366f1)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">LAUNCHES</div><div class="vbar"><span style="width:72%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">TUTORIALS</div><div class="vbar"><span style="width:89%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#0ea5e9,#22d3ee 50%,#a78bfa)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">REELS</div><div class="vbar"><span style="width:46%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#6366f1,#0f172a)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">EXPLAINERS</div><div class="vbar"><span style="width:63%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#f472b6,#8b5cf6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">ADS</div><div class="vbar"><span style="width:80%"></span></div></div></div><div class="col" id="col2" style="left:720px"><div class="vcard" style="background:linear-gradient(160deg,#22d3ee,#6366f1)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">LAUNCHES</div><div class="vbar"><span style="width:72%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">TUTORIALS</div><div class="vbar"><span style="width:89%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#0ea5e9,#22d3ee 50%,#a78bfa)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">REELS</div><div class="vbar"><span style="width:46%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#6366f1,#0f172a)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">EXPLAINERS</div><div class="vbar"><span style="width:63%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#f472b6,#8b5cf6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">ADS</div><div class="vbar"><span style="width:80%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#14b8a6,#3b82f6)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">AVATARS</div><div class="vbar"><span style="width:37%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#22d3ee,#6366f1)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">PRODUCT DEMOS</div><div class="vbar"><span style="width:54%"></span></div></div><div class="vcard" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+  <div class="vplay"><div class="tri"></div></div>
+  <div class="vlab">SHORTS</div><div class="vbar"><span style="width:71%"></span></div></div></div></div>
+      <div id="s2-head"><span class="h2" id="s2-l1">A FLOOD OF</span><span class="h2 gtxt" id="s2-l2" style="font-size:96px;white-space:nowrap">SCROLL-STOPPERS</span></div>
+    </div>
+  </section>
+
+  <!-- S3 audience -->
+  <section id="s3" class="clip scene" data-start="14.6" data-duration="4" data-track-index="1">
+    <div class="wrap" id="s3-wrap">
+      <div id="s3-head"><span class="h2" id="s3-l1">BUILT FOR THE</span><span class="h2 gtxt" id="s3-l2">AI SPACE</span></div>
+      <span id="orb"></span>
+      <span id="orbmark"><i></i><i></i><b></b></span>
+      <div class="chip" id="chip0" style="left:150px;top:640px">AI Creators</div><div class="chip" id="chip1" style="left:700px;top:600px">Founders</div><div class="chip" id="chip2" style="left:90px;top:1060px">AI Startups</div><div class="chip" id="chip3" style="left:730px;top:1100px">Educators</div><div class="chip" id="chip4" style="left:400px;top:1260px">Tech Brands</div>
+    </div>
+  </section>
+
+  <!-- S4 trusted -->
+  <section id="s4" class="clip scene" data-start="18.6" data-duration="3.8" data-track-index="1">
+    <div class="wrap" id="s4-wrap">
+      <span id="s4-label">TRUSTED BY</span>
+      <div class="client" id="cl0"><span class="ini">IO</span><div><span class="cname">Iman Ouboue</span><span class="crole"><b>✓</b> Floodgates client</span></div></div>
+      <div class="client" id="cl1"><span class="ini">LK</span><div><span class="cname">Lucinda Keiley</span><span class="crole"><b>✓</b> Floodgates client</span></div></div>
+      <span id="s4-more">+ top creators in the AI world</span>
+    </div>
+  </section>
+
+  <!-- S5 CTA -->
+  <section id="s5" class="clip scene" data-start="22.4" data-duration="7.6" data-track-index="1">
+    <div class="wrap" id="s5-wrap">
+      <div id="s5-head"><span class="h3" id="s5-l1">OPEN THE</span><span class="h3 gtxt" id="s5-l2">FLOODGATES.</span></div>
+      <div id="profile">
+        <span class="pav"><span class="m"><i></i><i></i><b></b></span></span>
+        <div class="ptext"><span class="handle">@byfloodgates</span><span class="pdesc">AI video studio</span></div>
+        <span id="follow">Follow</span>
+      </div>
+      <div id="dm"><span id="dmtxt">DM us to start →</span></div>
+    </div>
+  </section>
+
+  <div class="clip cap" id="cap0" data-start="0" data-duration="4.2" data-track-index="4"><span>AI creators. Your content deserves more than average visuals.</span></div><div class="clip cap" id="cap1" data-start="4.2" data-duration="5.0" data-track-index="4"><span>Meet Floodgates. An AI video studio, built for AI content creators.</span></div><div class="clip cap" id="cap2" data-start="9.2" data-duration="5.4" data-track-index="4"><span>We make scroll-stopping reels, explainers and ads, using the latest AI tools.</span></div><div class="clip cap" id="cap3" data-start="14.6" data-duration="4.0" data-track-index="4"><span>For creators, founders and anyone building in the AI space.</span></div><div class="clip cap" id="cap4" data-start="18.6" data-duration="3.8" data-track-index="4"><span>Trusted by top creators in the AI world.</span></div><div class="clip cap" id="cap5" data-start="22.4" data-duration="7.6" data-track-index="4"><span>Ready to open the floodgates? Follow @byfloodgates and DM us to start.</span></div>
+
+  <div id="hud" class="clip full" data-start="9.2" data-duration="20.8" data-track-index="5">
+    <div class="brandbar" id="brandbar"><span class="mark"><i></i><i></i><b></b></span><span class="bname">FLOODGATES</span></div>
+  </div>
+
+  <audio id="mix" src="assets/mix.wav" data-start="0" data-duration="30" data-track-index="10" data-volume="1"></audio>
+</div>
+<script>
+  window.__timelines = window.__timelines || {};
+  const tl = gsap.timeline({ paused: true });
+  const S = [0, 4.2, 9.2, 14.6, 18.6, 22.4], D = [4.2, 5.0, 5.4, 4.0, 3.8, 7.6];
+  const C = "50% 50%";
+
+  // ambient
+  tl.to("#wv0", { x: 260, duration: 30, ease: "sine.inOut" }, 0);
+  tl.to("#wv1", { x: -260, duration: 30, ease: "sine.inOut" }, 0);
+  tl.fromTo("#glow", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 0.8, duration: 1.2, ease: "power2.out" }, 1.4);
+  tl.to("#glow", { scale: 1.12, duration: 1.4, repeat: 19, yoyo: true, ease: "sine.inOut" }, 2.6);
+  tl.to("#grid", { y: 90, duration: 30, ease: "none" }, 0);
+
+  // captions + brand bar
+  for (let i = 0; i < 6; i++) tl.from(`#cap${i} span`, { y: 24, opacity: 0, duration: 0.4, ease: "power2.out" }, S[i] + 0.3);
+  tl.from("#brandbar", { y: -40, opacity: 0, duration: 0.5, ease: "power3.out" }, 9.3);
+
+  // scene exits
+  for (let i = 0; i < 5; i++) tl.to(`#s${i}-wrap`, { opacity: 0, scale: 1.04, duration: 0.25, ease: "power2.in", transformOrigin: C }, S[i] + D[i] - 0.25);
+
+  // S0 gates
+  tl.fromTo("#seam", { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.6, ease: "power3.out", transformOrigin: C }, 0.1);
+  tl.from("#kicker", { opacity: 0, y: 30, duration: 0.45, ease: "power3.out" }, 0.3);
+  tl.to("#kicker", { opacity: 0, scale: 1.3, duration: 0.25, ease: "power2.in", transformOrigin: C }, 1.35);
+  tl.to("#gateL", { x: -560, duration: 0.7, ease: "power4.inOut" }, 1.4);
+  tl.to("#gateR", { x: 560, duration: 0.7, ease: "power4.inOut" }, 1.4);
+  tl.to("#seam", { opacity: 0, duration: 0.2 }, 1.45);
+  tl.fromTo("#flood", { opacity: 0, scaleX: 0.1 }, { opacity: 1, scaleX: 1, duration: 0.6, ease: "power3.out", transformOrigin: C }, 1.45);
+  tl.to("#flood", { opacity: 0.35, duration: 1.2, ease: "power2.out" }, 2.1);
+  tl.from("#s0-l1", { y: 80, opacity: 0, duration: 0.5, ease: "power4.out" }, 1.75);
+  tl.from("#s0-l2", { y: 80, opacity: 0, duration: 0.5, ease: "power4.out" }, 1.9);
+  tl.from("#s0-sub", { opacity: 0, y: 20, duration: 0.4 }, 2.3);
+
+  // S1 wordmark
+  for (let k = 0; k < 10; k++) tl.from(`#lt${k}`, { y: 120, opacity: 0, duration: 0.5, ease: "power4.out" }, S[1] + 0.1 + k * 0.045);
+  tl.fromTo("#wline", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power3.inOut", transformOrigin: C }, S[1] + 0.6);
+  tl.from("#s1-pill", { scale: 0.6, opacity: 0, duration: 0.45, ease: "back.out(2)", transformOrigin: C }, S[1] + 1.0);
+  tl.from("#s1-for", { y: 30, opacity: 0, duration: 0.45, ease: "power3.out" }, S[1] + 2.0);
+  tl.to("#wm", { scale: 1.04, duration: 4, ease: "none", transformOrigin: C }, S[1] + 0.6);
+
+  // S2 waterfall: columns pour downward
+  [0, 1, 2].forEach((c) => {
+    tl.fromTo(`#col${c}`, { y: -200 * c }, { y: 1960 - 200 * c, duration: 5.4 + c * 0.6, ease: "none" }, S[2]);
+  });
+  tl.fromTo("#falls", { rotation: -6, scale: 1.1 }, { rotation: -3, scale: 1.1, duration: 5.4, ease: "none", transformOrigin: C }, S[2]);
+  tl.from("#s2-l1", { y: 60, opacity: 0, duration: 0.45, ease: "power4.out" }, S[2] + 0.15);
+  tl.from("#s2-l2", { y: 60, opacity: 0, duration: 0.45, ease: "power4.out" }, S[2] + 0.3);
+
+  // S3 audience
+  tl.from("#s3-l1", { y: 60, opacity: 0, duration: 0.45, ease: "power4.out" }, S[3] + 0.1);
+  tl.from("#s3-l2", { y: 60, opacity: 0, duration: 0.45, ease: "power4.out" }, S[3] + 0.25);
+  tl.from(["#orb", "#orbmark"], { scale: 0, duration: 0.6, ease: "back.out(1.8)", transformOrigin: C }, S[3] + 0.2);
+  tl.to("#orb", { scale: 1.06, duration: 0.8, repeat: 3, yoyo: true, ease: "sine.inOut", transformOrigin: C }, S[3] + 0.8);
+  for (let k = 0; k < 5; k++) {
+    tl.from(`#chip${k}`, { scale: 0, opacity: 0, duration: 0.4, ease: "back.out(2.2)", transformOrigin: C }, S[3] + 0.5 + k * 0.28);
+    tl.to(`#chip${k}`, { y: k % 2 ? 14 : -14, duration: 1.0, repeat: 2, yoyo: true, ease: "sine.inOut" }, S[3] + 1.0 + k * 0.1);
+  }
+
+  // S4 trusted
+  tl.from("#s4-label", { opacity: 0, y: 20, duration: 0.4 }, S[4] + 0.1);
+  tl.from("#cl0", { x: -900, duration: 0.55, ease: "power4.out" }, S[4] + 0.3);
+  tl.from("#cl1", { x: 900, duration: 0.55, ease: "power4.out" }, S[4] + 0.55);
+  tl.from("#s4-more", { opacity: 0, y: 20, duration: 0.4 }, S[4] + 1.3);
+
+  // S5 CTA
+  tl.from("#s5-l1", { y: 90, opacity: 0, duration: 0.5, ease: "power4.out" }, S[5] + 0.15);
+  tl.from("#s5-l2", { y: 90, opacity: 0, scale: 0.9, duration: 0.6, ease: "power4.out", transformOrigin: C }, S[5] + 0.35);
+  tl.from("#profile", { y: 140, opacity: 0, duration: 0.55, ease: "back.out(1.5)" }, S[5] + 1.2);
+  tl.to("#follow", { scale: 1.08, duration: 0.35, repeat: 7, yoyo: true, ease: "sine.inOut", transformOrigin: C }, S[5] + 2.0);
+  tl.from("#dmtxt", { opacity: 0, y: 30, duration: 0.45, ease: "power3.out" }, S[5] + 2.4);
+  tl.to("#dmtxt", { x: 12, duration: 0.4, repeat: 5, yoyo: true, ease: "sine.inOut" }, S[5] + 3.0);
+
+  window.__timelines["main"] = tl;
+</script>
+</body>
+</html>
