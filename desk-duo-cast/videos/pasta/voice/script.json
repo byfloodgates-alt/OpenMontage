@@ -1,0 +1,12 @@
+[
+ {"id":"01","who":"host","mood":"excited","text":"Claude! How do I make pasta?"},
+ {"id":"02","who":"bot","mood":"dry","text":"You've eaten pasta four hundred times. Fine. Step one. Boil water."},
+ {"id":"03","who":"host","mood":"calm","text":"How much water?"},
+ {"id":"04","who":"bot","mood":"dry","text":"A big pot. Salt it like the sea. Not like your personality."},
+ {"id":"05","who":"host","mood":"flat","text":"Wow. Step two?"},
+ {"id":"06","who":"bot","mood":"calm","text":"Pasta in. Stir. Ten minutes. Taste one. Try not to burn water."},
+ {"id":"07","who":"host","mood":"excited","text":"Then sauce?"},
+ {"id":"08","who":"bot","mood":"pleased","text":"Save a cup of pasta water. Butter, cheese, toss it all in the pan."},
+ {"id":"09","who":"host","mood":"excited","text":"I'm basically a chef now!"},
+ {"id":"10","who":"bot","mood":"dry","text":"You boiled water. Let's not get dramatic."}
+]

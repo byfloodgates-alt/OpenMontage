@@ -177,7 +177,7 @@ export function createBot(THREE, opts = {}) {
   const CAP = 0.78;
   const visorGeo = new THREE.SphereGeometry(R * 1.008, 40, 16, 0, Math.PI * 2, 0, CAP);
   visorGeo.rotateX(Math.PI / 2);
-  head.add(mesh(THREE, visorGeo, new THREE.MeshStandardMaterial({ color: P.visor, roughness: 0.38, metalness: 0.1 })));
+  head.add(mesh(THREE, visorGeo, new THREE.MeshStandardMaterial({ color: P.visor, roughness: 0.6, metalness: 0.05 })));
   const rimR = R * Math.sin(CAP), rimZ = R * Math.cos(CAP);
   head.add(mesh(THREE, new THREE.TorusGeometry(rimR * 1.01, 0.011, 6, 48), new THREE.MeshStandardMaterial({ color: P.rim, emissive: P.rim, emissiveIntensity: 0.35, roughness: 0.4 }), 0, 0, rimZ + 0.004));
 

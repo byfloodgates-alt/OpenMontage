@@ -1,0 +1,258 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pasta With Claude</title>
+<script type="importmap">{"imports":{"three":"/characters/node_modules/three/build/three.module.js"}}</script>
+<style>
+@font-face{font-family:Lora;font-weight:600;src:url(node_modules/@fontsource/lora/files/lora-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:Lora;font-weight:700;src:url(node_modules/@fontsource/lora/files/lora-latin-700-normal.woff2) format('woff2')}
+:root{--coral:#e8775a;--frame:#1d1716;--panel:#f6f0e8;--ink:#2a211d;--muted:#8d8079;--green:#2f9e6b;--cap:#f5d672}
+*{box-sizing:border-box}
+html,body{margin:0;width:720px;height:1280px;overflow:hidden;background:#2a1a12;font-family:Inter,sans-serif}
+#gl{position:absolute;inset:0}
+#vig{position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(180deg,rgba(40,22,12,.55) 0%,rgba(40,22,12,0) 30%),radial-gradient(120% 80% at 55% 70%,rgba(0,0,0,0) 55%,rgba(20,10,5,.45) 100%)}
+.card{position:absolute;left:26px;right:26px;top:50px;height:580px;background:var(--frame);border-radius:26px;padding:20px 18px 18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.05);transform-origin:50% 0;opacity:0}
+.hdr{display:flex;align-items:center;gap:10px}
+.pill{background:var(--coral);color:#fff;font:700 15px Inter;padding:6px 14px;border-radius:99px;letter-spacing:.02em;white-space:nowrap}
+.seg{flex:1;height:12px;border-radius:99px;background:#3a302c;overflow:hidden;position:relative}
+.seg i{position:absolute;inset:0;width:0;background:var(--coral);border-radius:99px}
+.seg.on{outline:2px solid #e9b26a;outline-offset:1px}
+h1{font:600 38px Lora,serif;color:#fff;margin:12px 4px 12px;letter-spacing:-.01em}
+.panel{position:absolute;left:14px;right:14px;top:132px;bottom:14px;background:var(--panel);border-radius:18px;padding:18px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #eadcd0;border-radius:12px;padding:11px 14px;margin-bottom:10px;
+  font:600 19px Inter;color:var(--ink);opacity:0}
+.row small{font:500 14px Inter;color:var(--muted);margin-left:2px}
+.row .ck{margin-left:auto;width:26px;height:26px;border-radius:50%;background:#e9e2da;display:grid;place-items:center;color:#fff;font:800 15px Inter;transform:scale(.6)}
+.row .ck.done{background:var(--green);transform:scale(1)}
+.row .ic{width:30px;height:30px;border-radius:8px;background:#fde7de;display:grid;place-items:center;font-size:17px}
+.meter{position:absolute;left:18px;right:18px;bottom:14px;display:flex;align-items:center;gap:10px;font:600 13px Inter;color:var(--muted)}
+.meter .bar{flex:1;height:10px;border-radius:99px;background:#eadfd4;overflow:hidden}
+.meter .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f0a35a,#e2553c);border-radius:99px}
+.meter b{color:#d9533a;font:800 14px Inter;min-width:44px;text-align:right}
+/* chat card */
+.chat{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.msg{max-width:84%;padding:14px 18px;border-radius:18px;font:600 22px Inter;opacity:0}
+.msg.me{align-self:flex-end;background:#2b2320;color:#fff;border-bottom-right-radius:6px}
+.msg.cl{align-self:flex-start;background:#fff;border:1.5px solid #eadcd0;color:var(--ink);border-bottom-left-radius:6px}
+.who{font:700 13px Inter;color:var(--muted);margin-bottom:4px;display:flex;gap:6px;align-items:center}
+.dots span{display:inline-block;width:9px;height:9px;border-radius:50%;background:#c9b9ad;margin:0 3px}
+/* captions */
+#cap{position:absolute;left:30px;right:30px;top:652px;text-align:center;font:700 37px/1.15 Lora,serif;color:var(--cap);
+  -webkit-text-stroke:5px #2a1608;paint-order:stroke fill;text-shadow:0 3px 0 #2a1608,0 6px 14px rgba(0,0,0,.5)}
+#cap span{display:inline-block}
+/* end card */
+#end{position:absolute;inset:0;background:radial-gradient(90% 60% at 50% 45%,#3a2a22,#1b1210);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;padding:0 50px;text-align:center}
+#end .play{width:92px;height:64px;border-radius:18px;background:var(--coral);display:grid;place-items:center;margin-bottom:34px}
+#end h2{font:600 42px/1.2 Lora,serif;color:#fff;margin:0 0 30px}
+#end p{font:500 20px/1.4 Inter;color:#d8c9bf;border:1.5px solid #4a3a33;border-radius:16px;padding:14px 22px;margin:0}
+.stamp{position:absolute;font:800 46px Inter;color:#d9533a;border:6px solid #d9533a;border-radius:12px;padding:4px 18px;letter-spacing:.06em;opacity:0}
+</style></head><body>
+<canvas id="gl"></canvas>
+<div id="vig"></div>
+
+<!-- 0: question -->
+<div class="card" id="c0"><div class="hdr"><span class="pill">ASK CLAUDE</span><span style="flex:1"></span><span style="color:#8d8079;font:600 14px Inter">today, 7:42 pm</span></div>
+  <h1>Dinner emergency</h1>
+  <div class="panel"><div class="chat">
+    <div class="msg me" id="q"><div class="who" style="color:#b9aaa0">You</div><span id="qt"></span></div>
+    <div class="msg cl" id="typing"><div class="who"><span style="color:var(--coral)">✳</span> Claude</div><div class="dots"><span></span><span></span><span></span></div></div>
+  </div></div></div>
+
+<!-- 1..4: steps -->
+<div class="card" id="c1"><div class="hdr"><span class="pill">STEP 1/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
+  <h1>Boil the water</h1>
+  <div class="panel">
+    <svg id="pot" width="250" height="150" viewBox="0 0 250 150" style="display:block;margin:-6px auto 6px">
+      <ellipse cx="125" cy="140" rx="90" ry="8" fill="#e4d6c8"/>
+      <g id="steam" stroke="#c9b9ad" stroke-width="5" fill="none" stroke-linecap="round" opacity="0">
+        <path d="M95 30 q-10 -12 0 -24"/><path d="M125 26 q-10 -12 0 -24"/><path d="M155 30 q-10 -12 0 -24"/></g>
+      <rect x="40" y="44" width="170" height="92" rx="14" fill="#3b3f46"/>
+      <rect x="20" y="58" width="26" height="12" rx="6" fill="#2c2f35"/><rect x="204" y="58" width="26" height="12" rx="6" fill="#2c2f35"/>
+      <clipPath id="pc"><rect x="48" y="50" width="154" height="80" rx="10"/></clipPath>
+      <g clip-path="url(#pc)"><rect id="water" x="48" y="130" width="154" height="80" fill="#6fb7d6"/>
+        <g id="bub" fill="#d8f0fa" opacity="0"><circle cx="80" cy="0" r="5"/><circle cx="120" cy="0" r="4"/><circle cx="160" cy="0" r="6"/><circle cx="100" cy="0" r="3"/><circle cx="140" cy="0" r="4"/></g></g>
+      <rect x="36" y="40" width="178" height="10" rx="5" fill="#4a4f57"/>
+    </svg>
+    <div class="row" data-in="5.64" data-ck="8.6"><span class="ic">🍲</span>Big pot<span class="ck">✓</span></div>
+    <div class="row" data-in="7.3" data-ck="8.9"><span class="ic">💧</span>Water <small>4–5 litres</small><span class="ck">✓</span></div>
+    <div class="row" data-in="9.12" data-ck="10.0"><span class="ic">🧂</span>Salt <small>like the sea · ~1 tbsp/L</small><span class="ck">✓</span></div>
+    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+  </div></div>
+
+<div class="card" id="c2"><div class="hdr"><span class="pill">STEP 2/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
+  <h1>Cook the pasta</h1>
+  <div class="panel">
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
+      <svg width="130" height="130" viewBox="0 0 130 130"><circle cx="65" cy="65" r="54" fill="#fff" stroke="#eadcd0" stroke-width="12"/>
+        <circle id="ring" cx="65" cy="65" r="54" fill="none" stroke="var(--coral)" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 65 65)"/>
+        <text id="clock" x="65" y="73" text-anchor="middle" font-family="Inter" font-weight="800" font-size="26" fill="#2a211d">10:00</text></svg>
+      <div style="font:600 17px/1.45 Inter;color:var(--muted)">Al dente<br><span style="color:var(--ink);font:700 22px Inter">~10 minutes</span><br>check the packet</div>
+    </div>
+    <div class="row" data-in="14.01" data-ck="14.3"><span class="ic">🍝</span>Pasta in<span class="ck">✓</span></div>
+    <div class="row" data-in="14.52" data-ck="14.8"><span class="ic">🥄</span>Stir <small>first minute</small><span class="ck">✓</span></div>
+    <div class="row" data-in="15.49" data-ck="15.9"><span class="ic">😋</span>Taste one<span class="ck">✓</span></div>
+    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+  </div></div>
+
+<div class="card" id="c3"><div class="hdr"><span class="pill">STEP 3/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
+  <h1>The sauce</h1>
+  <div class="panel">
+    <div class="row" data-in="19.08" data-ck="20.2"><span class="ic">🫙</span>Save 1 cup <small>pasta water</small><span class="ck">✓</span></div>
+    <div class="row" data-in="20.8" data-ck="21.1"><span class="ic">🧈</span>Butter<span class="ck">✓</span></div>
+    <div class="row" data-in="21.1" data-ck="21.5"><span class="ic">🧀</span>Parmesan <small>a lot</small><span class="ck">✓</span></div>
+    <div class="row" data-in="21.6" data-ck="22.5"><span class="ic">🍳</span>Toss it all in the pan<span class="ck">✓</span></div>
+    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+  </div></div>
+
+<div class="card" id="c4"><div class="hdr"><span class="pill">STEP 4/4</span><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div><div class="seg"><i></i></div></div>
+  <h1>Serve</h1>
+  <div class="panel">
+    <svg id="plate" width="300" height="190" viewBox="0 0 300 190" style="display:block;margin:4px auto 0">
+      <ellipse cx="150" cy="104" rx="132" ry="74" fill="#fff" stroke="#eadcd0" stroke-width="3"/>
+      <ellipse cx="150" cy="100" rx="92" ry="50" fill="#f5efe6"/>
+      <g fill="none" stroke="#e8b44c" stroke-width="7" stroke-linecap="round">
+        <path d="M95 102 q25 -30 55 0 t55 0"/><path d="M100 90 q25 25 50 0 t50 0"/><path d="M108 112 q22 -22 44 0 t44 0"/><path d="M115 80 q20 18 40 0 t40 0"/></g>
+      <g fill="#f3e3a0"><circle cx="128" cy="92" r="4"/><circle cx="160" cy="84" r="3"/><circle cx="172" cy="104" r="4"/><circle cx="140" cy="110" r="3"/></g>
+      <g fill="#4e9b4a"><ellipse cx="150" cy="78" rx="9" ry="5" transform="rotate(-25 150 78)"/><ellipse cx="160" cy="80" rx="9" ry="5" transform="rotate(25 160 80)"/></g>
+    </svg>
+    <div class="row" data-in="23.4" style="justify-content:center;font:700 22px Inter"><span class="ic">👨‍🍳</span>Chef status<small id="cs">checking…</small></div>
+    <div class="stamp" id="stamp" style="left:50%;top:70px">NOT YET</div>
+    <div class="meter"><span>Sarcasm level</span><div class="bar"><i></i></div><b>0%</b></div>
+  </div></div>
+
+<div id="cap"></div>
+<div id="end"><div class="play"><svg width="30" height="30" viewBox="0 0 30 30"><path d="M8 4 L26 15 L8 26 Z" fill="#fff"/></svg></div>
+  <h2>What should Claude roast you about next?</h2>
+  <p>Send this to the friend who burns water</p></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { createHost, createBot, addWarmLights } from '/characters/characters.js';
+const W = 720, H = 1280, DPR = window.devicePixelRatio || 1;
+const tl = await (await fetch('voice/out/timeline.json')).json();
+const cap = await (await fetch('voice/out/captions.json')).json();
+const TOTAL = 30.6, FPS = 30;
+await document.fonts.ready;
+
+// ---------- 3D room (same set as the cast kit's test scene)
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(DPR); renderer.setSize(W, H);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const s = new THREE.Scene(); s.background = new THREE.Color(0x3a2418);
+addWarmLights(THREE, s);
+const M = (c, o) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, flatShading: true, ...o });
+const add = (g, m, x, y, z) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; s.add(o); return o; };
+add(new THREE.PlaneGeometry(12, 6), M(0xc9976c), 0, 3, -1.6);
+add(new THREE.PlaneGeometry(12, 12), M(0x6a3e26), 0, 0, 0).rotation.x = -Math.PI / 2;
+add(new THREE.BoxGeometry(3.4, 0.06, 0.95), M(0xc07a42), 1.3, 0.95, -0.95);
+for (let i = 0; i < 12; i++) add(new THREE.BoxGeometry(0.24, 0.9, 0.04), M(i % 2 ? 0xc98a52 : 0xb87440), -0.2 + i * 0.27, 0.47, -0.5);
+add(new THREE.BoxGeometry(0.75, 0.9, 0.7), M(0xe6ddd0), 2.25, 0.45, 0.05);
+const cv = document.createElement('canvas'); cv.width = 512; cv.height = 300; const c2 = cv.getContext('2d');
+c2.fillStyle = '#121418'; c2.fillRect(0, 0, 512, 300);
+['#e46f5a', '#e6b04c', '#5db7a8', '#6d8fe0'].forEach((col, r) => { for (let k = 0; k < 6; k++) { c2.fillStyle = col; c2.fillRect(40 + k * 72 + (r % 2) * 20, 150 + r * 26, 60, 16); } });
+['#ff5f57', '#febc2e', '#28c840'].forEach((col, k) => { c2.fillStyle = col; c2.beginPath(); c2.arc(30 + k * 22, 26, 7, 0, 7); c2.fill(); });
+const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+add(new THREE.BoxGeometry(1.1, 0.68, 0.05), M(0x15161a), 0.75, 1.42, -1.25);
+add(new THREE.PlaneGeometry(1.04, 0.62), new THREE.MeshBasicMaterial({ map: tex }), 0.75, 1.42, -1.222);
+add(new THREE.BoxGeometry(0.06, 0.3, 0.06), M(0x15161a), 0.75, 1.1, -1.25);
+add(new THREE.PlaneGeometry(0.75, 0.95), M(0xf1e6d6), 0.35, 2.35, -1.58);
+add(new THREE.PlaneGeometry(0.8, 0.55), M(0x2b2019), 2.0, 2.1, -1.58);
+// a little pasta box and a mug on the desk
+add(new THREE.BoxGeometry(0.16, 0.26, 0.07), M(0x2f62b8), 0.05, 1.11, -0.75).rotation.y = 0.3;
+add(new THREE.CylinderGeometry(0.06, 0.055, 0.13, 10), M(0xefe7dc), 2.3, 1.045, -0.7);
+const h = createHost(THREE), b = createBot(THREE, { stand: 0.25 });
+h.root.position.set(0, 0, 0.6); h.root.rotation.y = 0.8;
+b.root.position.set(1.5, 0.98, -0.7); b.root.rotation.y = -0.55; b.root.scale.setScalar(1.3);
+s.add(h.root, b.root);
+const cam = new THREE.PerspectiveCamera(52, W / H, 0.05, 50); cam.position.set(0.6, 1.5, 4.4); cam.lookAt(0.65, 2.6, 0);
+
+// ---------- helpers
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const k = (t, t0, d = 0.35) => clamp((t - t0) / d);                      // 0..1 progress
+const back = (x) => { const c = 1.7; return x <= 0 ? 0 : x >= 1 ? 1 : 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const smooth = (x) => x * x * (3 - 2 * x);
+const $ = (q, r = document) => r.querySelector(q);
+const inWin = (t, a, z) => t >= a && t < z;
+// acting overrides by time: host reactions to the roasts
+const hostReact = [[3.6, 5.0, { brows: -0.6, browTilt: 1 }], [10.3, 12.3, { brows: -1, smile: -0.4 }], [16.2, 17.6, { brows: 0.6, look: [0.5, 0.5] }], [25.2, 28.4, { brows: -0.8, headNod: 0.12, smile: -0.5 }]];
+const botMood = { dry: 'squint', pleased: 'happy', calm: 'neutral' };
+
+// card windows: [id, start, end]
+const CARDS = [['c0', 0.0, 2.15], ['c1', 2.15, 12.3], ['c2', 12.3, 17.75], ['c3', 17.75, 23.15], ['c4', 23.15, 28.6]];
+// sarcasm meter values over time
+const SASS = [[0, 0], [3.0, 38], [4.7, 52], [10.5, 81], [16.6, 88], [26.2, 100]];
+// each keyframe ramps from the previous value over 0.6 s
+const sassAt = (t) => { let v = 0; for (let i = 1; i < SASS.length; i++) { const [ti, vi] = SASS[i]; v = t < ti ? v : SASS[i - 1][1] + (vi - SASS[i - 1][1]) * smooth(clamp((t - ti) / 0.6)); if (t < ti) break; } return Math.round(v); };
+
+window.frameCount = Math.round(TOTAL * FPS);
+window.frame = (i) => {
+  const t = i / FPS;
+  // ---- cards
+  CARDS.forEach(([id, a, z], n) => {
+    const el = document.getElementById(id);
+    const vin = back(k(t, a, 0.4)), vout = smooth(k(t, z - 0.25, 0.25));
+    const on = t >= a && t < z;
+    el.style.opacity = on ? Math.min(1, vin * 1.5) * (1 - vout) : 0;
+    el.style.transform = `translateY(${(1 - vin) * 30 - vout * 20}px) scale(${0.94 + 0.06 * vin})`;
+    if (!on) return;
+    // header segments: earlier steps full, current one fills over its window
+    el.querySelectorAll('.seg').forEach((sg, j) => {
+      const cur = j + 1 === n; sg.classList.toggle('on', cur);
+      sg.firstElementChild.style.width = (j + 1 < n ? 100 : cur ? 100 * smooth(clamp((t - a) / (z - a))) : 0) + '%';
+    });
+    el.querySelectorAll('.row').forEach((r) => {
+      const ti = +r.dataset.in, tc = r.dataset.ck ? +r.dataset.ck : null;
+      const p = back(k(t, ti, 0.35));
+      r.style.opacity = clamp(p * 1.4); r.style.transform = `translateX(${(1 - p) * 40}px)`;
+      const ck = r.querySelector('.ck'); if (ck && tc != null) ck.classList.toggle('done', t >= tc);
+      if (ck && tc != null) ck.style.transform = `scale(${t >= tc ? 0.6 + 0.4 * back(k(t, tc, 0.25)) : 0.6})`;
+    });
+    const m = el.querySelector('.meter'); if (m) { const v = sassAt(t); m.querySelector('i').style.width = v + '%'; m.querySelector('b').textContent = v + '%'; }
+  });
+  // question card: typing then Claude dots
+  const q = 'how do I make pasta?'; const nq = Math.floor(clamp((t - 0.55) / 0.9) * q.length);
+  $('#q').style.opacity = clamp((t - 0.35) / 0.2); $('#qt').textContent = q.slice(0, nq) + (nq < q.length && t > 0.35 ? '|' : '');
+  $('#typing').style.opacity = clamp((t - 1.6) / 0.2);
+  document.querySelectorAll('.dots span').forEach((d, j) => d.style.transform = `translateY(${-4 * Math.max(0, Math.sin(t * 9 - j * 0.9))}px)`);
+  // pot: water fills 7.3..9, boils from 9.5
+  const wl = smooth(clamp((t - 7.3) / 1.6)); $('#water').setAttribute('y', 130 - wl * 62);
+  const boil = clamp((t - 9.5) / 0.6);
+  $('#bub').setAttribute('opacity', boil); $('#steam').setAttribute('opacity', boil * (0.6 + 0.4 * Math.sin(t * 3)));
+  [...$('#bub').children].forEach((c, j) => { const ph = (t * 1.3 + j * 0.37) % 1; c.setAttribute('cy', 128 - ph * 60 * wl); c.setAttribute('r', 2 + 4 * Math.sin(ph * Math.PI)); });
+  [...$('#steam').children].forEach((p, j) => p.setAttribute('transform', `translate(0 ${-((t * 18 + j * 9) % 14)})`));
+  // timer: 10:00 -> 0:00 between 14.8 and 16.0 (sped up)
+  const tp = smooth(clamp((t - 14.8) / 1.2)); $('#ring').setAttribute('stroke-dashoffset', 339.3 * (1 - tp));
+  const secs = Math.round(600 * (1 - tp)); $('#clock').textContent = `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+  // chef verdict
+  $('#cs').textContent = t < 26.37 ? 'checking…' : 'pending review';
+  const sp = back(k(t, 26.4, 0.3)); const st = $('#stamp');
+  st.style.opacity = t >= 26.4 ? clamp(sp * 2) : 0; st.style.transform = `translate(-50%,0) rotate(-12deg) scale(${2.2 - 1.2 * sp})`;
+  // ---- captions: current phrase, pops in
+  const ph = cap.phrases.find((p) => t >= p.t0 - 0.05 && t < Math.max(p.t1 + 0.15, p.t0 + 0.5) && t < 28.6);
+  const ce = $('#cap');
+  if (ph) { if (ce.dataset.k !== ph.t0 + '') { ce.dataset.k = ph.t0 + ''; ce.innerHTML = `<span>${ph.text}</span>`; }
+    const pp = back(k(t, ph.t0 - 0.05, 0.18)); ce.firstChild.style.transform = `scale(${0.85 + 0.15 * pp})`; ce.style.opacity = 1; }
+  else ce.style.opacity = 0;
+  // ---- end card
+  const e = smooth(k(t, 28.6, 0.45)); $('#end').style.opacity = e;
+  $('#end').style.transform = `scale(${1.04 - 0.04 * e})`;
+  // ---- characters
+  const f = tl.frames[Math.min(i, tl.frames.length - 1)] || {};
+  const speaking = i < tl.frames.length ? f.speaker : null;
+  const blinkH = (t % 3.7) < 0.12 ? 1 : 0, blinkB = ((t + 1.3) % 4.3) < 0.1 ? 1 : 0;
+  const ex = f.hostMood === 'excited' && speaking === 'host';
+  let hs = { talk: speaking === 'host' ? f.host : 0, breathe: t / 4, blink: blinkH, headTurn: speaking === 'host' ? 0.05 : 0.2,
+    headNod: speaking === 'host' ? Math.sin(t * 7) * 0.03 * f.host : 0, headTilt: f.hostMood === 'flat' ? 0.07 : 0,
+    brows: ex ? 0.9 : f.hostMood === 'flat' ? -0.2 : 0.1, smile: ex ? 0.5 : 0, look: [0.5, 0.2], lean: ex ? 0.08 : 0,
+    armL: { raise: 0.2, bend: 1.25 },
+    armR: ex ? { raise: 0.9 + Math.sin(t * 6) * 0.15, bend: 1.7, out: 0.25 } : { raise: 0.2, bend: 1.25 } };
+  for (const [a, z, o] of hostReact) if (inWin(t, a, z)) hs = { ...hs, ...o };
+  h.update(hs);
+  b.update({ t, talk: speaking === 'bot' ? f.bot : 0, blink: blinkB, headTurn: speaking === 'bot' ? -0.05 : 0.08, look: [-0.5, -0.1],
+    mood: t > 26.4 && t < 28.6 ? 'happy' : (botMood[f.botMood] || 'neutral'), headTilt: speaking === 'bot' ? Math.sin(t * 3) * 0.03 : 0 });
+  renderer.render(s, cam);
+};
+window.__done = true;
+</script></body></html>
